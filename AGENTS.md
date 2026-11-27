@@ -17,10 +17,11 @@ Build an offline-first art education image timer/player optimized for iPad + cla
 - Avoid adding any copyrighted image material as starter assets.
 
 ## Tech
-React + TypeScript + Vite PWA, GitHub Pages project base `/art-class-player/`. IndexedDB for imported images and saved lesson state in a later milestone. Avoid network dependencies during runtime.
+React + TypeScript + Vite PWA, GitHub Pages project base `/art-class-player/`. IndexedDB for imported photos; localStorage for settings and session checkpoints. Avoid network dependencies during runtime.
 
 ## Workflow
 - ART 0A: docs, architecture and scaffold; validate types/build where execution is available.
 - ART 1A: import photos, timed playback, projector-friendly view, pause/next/extend.
-- ART 1B: offline/PWA persistence and iPad testing.
+- ART 1B: offline/PWA persistence and Windows browser testing. iPad hardware validation deferred to final QA.
+- Deploy Pages only after Windows and build tests pass. Never claim deployment until verified.
 - Keep changes small, test, and report limitations.

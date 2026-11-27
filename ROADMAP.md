@@ -7,7 +7,7 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 | --- | --- | --- |
 | ART 0A | Repo setup, technical risk review, React/TS/Vite skeleton | Structure and documentation committed; build requires CI confirmation |
 | ART 1A | Multi-image import, interval timer, full-screen presentation, pause/next/+time | Image advances on schedule; no unwanted crop; teacher can override |
-| ART 1B | PWA, offline asset cache, safe resume, iPad storage/screen/projection tests | Works without connectivity after first load, iPad tests recorded |
+| ART 1B | PWA, offline asset cache, local image storage, safe resume, Pages | Windows offline and recovery tests; final iPad QA deferred |
 | ART 2A | Categories, tags, difficulty, favorites, de-duplication | Filter and find images locally |
 | ART 2B | Classes, usage history, lesson plans, presets, smart no-repeat | Cheongun and Danwol histories independent |
 | ART 3A | Grayscale, tone steps, grid, flip, zoom and image adjustments | Edits never alter original |
@@ -34,8 +34,14 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 - [x] GitHub repository access confirmed.
 - [x] Architecture and roadmap documented.
 - [x] React TypeScript Vite starter source committed.
-- [ ] Install dependencies and run production build in CI/local runtime.
+- [x] Install dependencies and run production build in CI/local runtime.
 - [ ] Verify iPad Safari and external projector in person.
 
 ## Later: class session sample
 1min × 5, 3min × 5, 5min × 5, break 10min, 10min × 5, 20min × 2. These timings are configurable.
+
+## Stage status
+- ART 0A: complete (CI build).
+- ART 1A: complete (CI 9/9 functional tests, user 10/10).
+- ART 1B: implementation, automated validation and Pages deployment in progress.
+- iPad, HDMI and long-session verification: ART 4A final hardware QA, per user request.
