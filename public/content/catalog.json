@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": 1,
+  "version": 2,
   "updated": "2026-11-27",
   "items": [
     {
@@ -97,6 +97,66 @@
       "license": "CC-BY-4.0",
       "source": "https://commons.wikimedia.org/wiki/File:Landscape_with_mountain%2C_forest_and_lake_with_reflection.jpg",
       "image": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Landscape_with_mountain,_forest_and_lake_with_reflection.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "land-snow-mountain",
+      "title": "설산과 침엽수림의 호수",
+      "category": "풍경화",
+      "tag": "설산·반영",
+      "level": "중급",
+      "author": "Bonnie Moreland",
+      "license": "CC0-1.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Lake_Mountain_Landscape.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/7/75/Lake_Mountain_Landscape.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "land-autumn-color",
+      "title": "가을 숲과 물의 색채",
+      "category": "풍경화",
+      "tag": "가을·반영",
+      "level": "중급",
+      "author": "Holly's Coastal View",
+      "license": "CC0-1.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Autumn_Lake_Landscape.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Autumn_Lake_Landscape.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "pose-group-exercise",
+      "title": "여러 인물의 운동 자세",
+      "category": "크로키",
+      "tag": "군상·동작",
+      "level": "고급",
+      "author": "Samson Ssemakadde",
+      "license": "CC0-1.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Yoga_and_fitness_work_out.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/4/41/Yoga_and_fitness_work_out.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "still-fruit-fenton",
+      "title": "과일 정물 — 흑백 명암",
+      "category": "정물화",
+      "tag": "과일·명암",
+      "level": "고급",
+      "author": "Roger Fenton / Metropolitan Museum of Art",
+      "license": "CC0-1.0",
+      "source": "https://commons.wikimedia.org/wiki/File:-Still_Life_with_Fruit-_MET_DP209008.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/1/1a/-Still_Life_with_Fruit-_MET_DP209008.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "architecture-gyeonghoeru",
+      "title": "눈 내린 경회루",
+      "category": "건축",
+      "tag": "전통 건축·반영",
+      "level": "중급",
+      "author": "신재미",
+      "license": "CC-BY-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:%EA%B2%BD%EB%B3%B5%EA%B6%81%EA%B2%BD%ED%9A%8C%EB%A3%A8.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/d/d6/%EA%B2%BD%EB%B3%B5%EA%B6%81%EA%B2%BD%ED%9A%8C%EB%A3%A8.jpg",
       "added": "2026-11-27"
     }
   ]

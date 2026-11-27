@@ -7,3 +7,6 @@ User changed the product priority to instructor-ready content continuously curat
 - Automatic Windows test mocks image bytes for deterministic storage/replay verification; real external downloads and actual Pages publishing not yet verified by CI.
 - ART 2B: robust update/delivery pipeline and user tags/favorites. ART 2C: scheduled curated publication with verified rights and image quality. No recurring automation created yet.
 - ART 1B Windows validations passed; Pages setup requires repository owner to enable Actions source. iPad hardware QA deferred.
+
+## Final Windows validation
+Run 45966876033: 7 unit + 5 browser tests passed. User reported 9/9 passed including real external download and offline playback. A white screen during version transition was reported and subsequently user verified all features; precise root cause not confirmed. Pages configuration remains blocked.

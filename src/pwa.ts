@@ -15,14 +15,14 @@ export function usePwa(){
  useEffect(()=>{
   if(!import.meta.env.PROD||!('serviceWorker' in navigator))return
   let alive=true
-  const controller=()=>{if(!alive)return;setReady(!!navigator.serviceWorker.controller);if(applying.current)location.reload()}
+  const controller=()=>{if(!alive)return;setReady(!!navigator.serviceWorker.controller);setUpdate(false);if(applying.current)location.reload()}
   navigator.serviceWorker.addEventListener('controllerchange',controller)
   void navigator.serviceWorker.register(import.meta.env.BASE_URL+'sw.js',{scope:import.meta.env.BASE_URL}).then(r=>{
    if(!alive)return
    reg.current=r
    const check=()=>{if(alive)setUpdate(!!r.waiting&&!!navigator.serviceWorker.controller)}
    check();setReady(!!navigator.serviceWorker.controller)
-   r.addEventListener('updatefound',()=>{r.installing?.addEventListener('statechange',check)})
+   const watch=()=>{r.installing?.addEventListener('statechange',check);check()};r.addEventListener('updatefound',watch);watch()
    void navigator.serviceWorker.ready.then(()=>{if(alive)setReady(!!navigator.serviceWorker.controller)})
    void r.update().catch(()=>{})
   }).catch(()=>{if(alive)setError('오프라인 앱 설치 실패. 인터넷 연결 후 다시 열어 주세요.')})

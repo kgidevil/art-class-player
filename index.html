@@ -11,7 +11,20 @@
     <title>ART CLASS PLAYER</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div id="boot-status" style="background:#111010;color:#f5f2ed;min-height:90vh;padding:32px;font:18px system-ui"><p>ART CLASS PLAYER · 불러오는 중</p><p>오랫동안 화면이 열리지 않으면 앱 캐시를 복구하세요. 저장한 사진은 삭제하지 않습니다.</p><button id="boot-repair" style="padding:12px">앱 캐시 복구</button><p id="boot-message"></p></div></div>
+    <script>
+      document.getElementById('boot-repair').addEventListener('click',async()=>{
+        const message=document.getElementById('boot-message');
+        try{
+          if(!navigator.onLine){message.textContent='인터넷에 연결한 후 다시 시도하세요.';return}
+          const response=await fetch(location.pathname+'?repair='+Date.now(),{cache:'no-store'});
+          if(!response.ok)throw Error('Server unavailable');
+          if('serviceWorker' in navigator){for(const reg of await navigator.serviceWorker.getRegistrations()){if(reg.scope===new URL('%BASE_URL%',location.origin).href)await reg.unregister()}}
+          if('caches' in window){for(const key of await caches.keys()){if(key.startsWith('sai-art-player-'))await caches.delete(key)}}
+          location.reload()
+        }catch{message.textContent='복구 실패. 서버 연결을 확인해 주세요.'}
+      })
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

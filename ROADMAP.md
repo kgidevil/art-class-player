@@ -48,3 +48,6 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 - ART 1B: Windows user 10/10 and CI 4/4 browser tests passed; Pages activation blocked (configure-pages 404).
 - ART 2A: catalog pilot and local download implementation; CI and live download verification pending.
 - iPad, HDMI and long-session verification: ART 4A final hardware QA, per user request.
+
+- ART 2A: user Windows 9/9, unit 7/7, browser 5/5. Pages activation pending.
+- ART 2B: independent remote catalog, opt-in auto download, favorites, storage and PWA hardening; validation pending.

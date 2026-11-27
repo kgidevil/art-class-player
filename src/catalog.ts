@@ -18,12 +18,19 @@ export function validateCatalog(value:unknown):Catalog {
 }
 const KEY='sai.catalog.v1'
 export function readCatalog():Catalog|null{try{return validateCatalog(JSON.parse(localStorage.getItem(KEY)??'null'))}catch{return null}}
+export const REMOTE_CATALOG='https://raw.githubusercontent.com/kgidevil/art-class-player/main/public/content/catalog.json'
 export async function fetchCatalog():Promise<Catalog>{
- const res=await fetch(import.meta.env.BASE_URL+'content/catalog.json',{cache:'no-store'})
- if(!res.ok)throw Error('Catalog unavailable')
- const fresh=validateCatalog(await res.json())
- const prior=readCatalog()
- if(prior&&prior.version>fresh.version)return prior
+ const candidates:Catalog[]=[]
+ const prior=readCatalog();if(prior)candidates.push(prior)
+ const urls=[import.meta.env.BASE_URL+'content/catalog.json',REMOTE_CATALOG]
+ const results=await Promise.allSettled(urls.map(async url=>{
+  const res=await fetch(url,{cache:'no-store',credentials:'omit',signal:AbortSignal.timeout(12000)})
+  if(!res.ok)throw Error('Catalog unavailable')
+  return validateCatalog(await res.json())
+ }))
+ for(const r of results)if(r.status==='fulfilled')candidates.push(r.value)
+ if(!candidates.length)throw Error('Catalog unavailable')
+ const fresh=candidates.reduce((a,b)=>b.version>a.version?b:a)
  try{localStorage.setItem(KEY,JSON.stringify(fresh))}catch{/* still usable this session */}
  return fresh
 }

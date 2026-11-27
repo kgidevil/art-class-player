@@ -8,7 +8,7 @@ import Library,{Credits} from './Library'
 import {categories,downloadReference} from './catalog'
 import type {CatalogItem} from './catalog'
 
-type Photo = { id: number; name: string; url: string; reference?:CatalogItem }
+type Photo = { id: number; name: string; url: string; reference?:CatalogItem; bytes:number }
 const presets = [30,60,120,180,300,600,900,1200]
 const durationLabel = (s: number) => s < 60 ? s + '초' : s/60 + '분'
 const logo = import.meta.env.BASE_URL + 'sai-logo.jpg'
@@ -29,6 +29,11 @@ export default function App() {
   const [storageError,setStorageError] = useState('')
   const [recovery,setRecovery] = useState<SavedSession|null>(null)
   const [storageStatus,setStorageStatus] = useState('기기 저장소')
+  const [quota,setQuota]=useState<{usage?:number;quota?:number}>({})
+  const [downloadProgress,setDownloadProgress]=useState('')
+  const totalBytes=photos.reduce((n,p)=>n+p.bytes,0)
+  const mb=(n:number)=>(n/1048576).toFixed(1)+' MB'
+  useEffect(()=>{void navigator.storage?.estimate?.().then(setQuota).catch(()=>{})},[photos.length])
   const pwa=usePwa()
   const [notice,setNotice] = useState('')
   const [seconds,setSeconds] = useState(()=>readSettings().seconds??300)
@@ -61,7 +66,7 @@ export default function App() {
     let alive=true
     void readPhotos().then(records=>{
       if(!alive)return
-      const restored=records.map(p=>{const url=URL.createObjectURL(p.blob);urls.current.add(url);return {id:p.id,name:p.name,url,reference:p.reference}})
+      const restored=records.map(p=>{const url=URL.createObjectURL(p.blob);urls.current.add(url);return {id:p.id,name:p.name,url,reference:p.reference,bytes:p.blob.size}})
       serial.current=records.reduce((max,p)=>Math.max(max,p.id),0)
       setPhotos(restored)
       const previous=readSession()
@@ -120,7 +125,7 @@ export default function App() {
     for(const file of Array.from(files)){
       if(!file.type.startsWith('image/') && !/\.(jpe?g|png|webp|gif|bmp|avif|heic|heif)$/i.test(file.name)){bad++;continue}
       const url=URL.createObjectURL(file)
-      try { const img=new Image();img.src=url;await img.decode();const id=++serial.current;urls.current.add(url);accepted.push({id,name:file.name,url});records.push({id,name:file.name,blob:file}) }
+      try { const img=new Image();img.src=url;await img.decode();const id=++serial.current;urls.current.add(url);accepted.push({id,name:file.name,url,bytes:file.size});records.push({id,name:file.name,blob:file}) }
       catch{URL.revokeObjectURL(url);bad++}
     }
     try{if(records.length)await addPhotos(records);setPhotos(p=>[...p,...accepted]);setNotice(accepted.length+'장 추가'+(bad ? ' · '+bad+'장은 지원되지 않거나 손상된 이미지입니다.' : ''))}
@@ -132,15 +137,16 @@ export default function App() {
     setBusy(true);setNotice('')
     const records:StoredPhoto[]=[];const accepted:Photo[]=[];let failures=0
     const seen=new Set(photos.flatMap(p=>p.reference?[p.reference.id]:[]))
-    for(const item of items){
+    for(const [position,item] of items.entries()){
+      setDownloadProgress((position+1)+' / '+items.length+'장 다운로드 중')
       if(seen.has(item.id))continue
       let url=''
-      try{const blob=await downloadReference(item);url=URL.createObjectURL(blob);const img=new Image();img.src=url;await img.decode();const id=++serial.current;seen.add(item.id);urls.current.add(url);records.push({id,name:item.title,blob,reference:item});accepted.push({id,name:item.title,url,reference:item})}
+      try{const blob=await downloadReference(item);url=URL.createObjectURL(blob);const img=new Image();img.src=url;await img.decode();const id=++serial.current;seen.add(item.id);urls.current.add(url);records.push({id,name:item.title,blob,reference:item});accepted.push({id,name:item.title,url,reference:item,bytes:blob.size})}
       catch{if(url)URL.revokeObjectURL(url);failures++}
     }
     try{if(records.length)await addPhotos(records);setPhotos(p=>[...p,...accepted]);setNotice('제공 자료 '+accepted.length+'장 저장'+(failures?' · '+failures+'장 다운로드 실패, 다시 시도해 주세요.':''));if(accepted.length){setSource('제공 자료');setTopic('전체')}}
     catch{accepted.forEach(p=>{URL.revokeObjectURL(p.url);urls.current.delete(p.url)});setNotice('제공 자료를 저장하지 못했습니다. 기존 사진은 유지됩니다.')}
-    finally{setBusy(false)}
+    finally{setBusy(false);setDownloadProgress('')}
   }
   async function remove(id:number){if(busy||recovery||!loaded)return;setBusy(true);try{await deletePhoto(id);const p=photos.find(p=>p.id===id);if(p){URL.revokeObjectURL(p.url);urls.current.delete(p.url)}setPhotos(p=>p.filter(i=>i.id!==id));setNotice('사진을 삭제했습니다.')}catch{setNotice('사진 삭제에 실패했습니다.')}finally{setBusy(false)}}
   async function clear(){if(busy||recovery||!loaded||!window.confirm('기기에 저장된 모든 수업 사진을 삭제할까요?'))return;setBusy(true);try{await clearPhotos();photos.forEach(p=>{URL.revokeObjectURL(p.url);urls.current.delete(p.url)});setPhotos([]);setNotice('모든 사진을 삭제했습니다.')}catch{setNotice('사진 삭제에 실패했습니다.')}finally{setBusy(false)}}
@@ -157,7 +163,7 @@ export default function App() {
     </section>
     <footer className="controls"><div className="filename">{active.name} · {wakeStatus}{active.reference&&<> · <Credits item={active.reference}/></>}{storageError?' · '+storageError:''}</div><div className="control-row"><button disabled={clock.index===0} onClick={()=>command((c,t)=>move(c,-1,t))}>이전</button><button className="primary" disabled={clock.finished} onClick={()=>command(toggle)}>{clock.deadline===null?'재생':'일시정지'}</button><button disabled={clock.finished} onClick={()=>command((c,t)=>move(c,1,t))}>다음</button><button onClick={()=>command(restart)}>다시 시작</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,30000,t))}>+30초</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,60000,t))}>+1분</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,300000,t))}>+5분</button><button onClick={()=>setShowTimer(v=>!v)}>{showTimer?'시간 숨기기':'시간 표시'}</button></div></footer>
   </main>
-  return <main className="shell"><header className="top"><Brand/><span className="version">ART 2A · v0.4</span></header>
+  return <main className="shell"><header className="top"><Brand/><span className="version">ART 2B · v0.5</span></header>
     <section className="intro"><div className="eyebrow">SAI COMPANY / DRAWING STUDIO</div><h1>그림을 바라보는 시간.</h1><p>사진을 선택하고 시간을 정하면 자동으로 다음 그림으로 넘어갑니다.</p></section>
     <section className="status-strip" aria-label="앱 상태">
       <span data-testid="offline-status">{pwa.ready?'오프라인 사용 준비 완료':pwa.error||'오프라인 준비 전 · 배포 버전에서 사용'}</span><span>{pwa.online?'온라인':'오프라인'}</span><span>{loaded?storageStatus:storageError?'저장소 오류':'사진 불러오는 중…'}</span>
@@ -166,6 +172,7 @@ export default function App() {
     </section>
     {storageError&&<p role="alert" className="warning">{storageError}</p>}
     {recovery&&<section className="recovery" role="region" aria-label="이전 수업 복구"><div><strong>이전 수업을 이어서 진행할까요?</strong><p>{recovery.clock.index+1} / {recovery.ids.length}장 · 남은 시간 {formatTime(recovery.clock.remaining)} · 일시정지 상태로 복구</p></div><button className="primary" onClick={resumeRecovery}>이전 수업 복구</button><button onClick={discardRecovery}>기록 삭제하고 새 수업</button></section>}
+    <section className="status-strip" aria-label="저장 공간"><strong>사진 저장 공간 {mb(totalBytes)}</strong><span>개인 사진 {mb(photos.filter(p=>!p.reference).reduce((n,p)=>n+p.bytes,0))} · 제공 자료 {mb(photos.filter(p=>p.reference).reduce((n,p)=>n+p.bytes,0))}</span>{quota.quota!==undefined&&quota.usage!==undefined&&<span>브라우저 추정 사용량 {mb(quota.usage)} / {mb(quota.quota)}</span>}{downloadProgress&&<span role="status">{downloadProgress}</span>}</section>
     <Library downloaded={downloaded} onDownload={receive} busy={busy} disabled={!loaded||!!recovery} online={pwa.online}/>
     <div className="setup-grid"><section className="panel"><div className="section-head"><h2>01. 수업 이미지</h2><span>{eligible.length} / {photos.length}장</span></div>
       <div className="catalog-filters"><label>수업 자료<select aria-label="재생 자료 범위" value={source} onChange={e=>{setSource(e.target.value);setTopic('전체')}}>{['전체','제공 자료','내 사진'].map(s=><option key={s}>{s}</option>)}</select></label><label>주제<select aria-label="재생 주제" disabled={source==='내 사진'} value={topic} onChange={e=>setTopic(e.target.value)}>{['전체',...categories].map(c=><option key={c}>{c}</option>)}</select></label></div>

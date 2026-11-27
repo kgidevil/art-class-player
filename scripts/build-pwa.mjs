@@ -11,9 +11,9 @@ async function walk(dir){const entries=await readdir(dir,{withFileTypes:true});c
 const paths=(await walk(dist)).sort()
 const hash=createHash('sha256')
 hash.update(await readFile(new URL(import.meta.url)))
-for(const p of paths){hash.update(path.relative(dist,p).replaceAll('\\','/'));hash.update(await readFile(p))}
+for(const p of paths.filter(p=>!p.endsWith(path.join('content','catalog.json')))){hash.update(path.relative(dist,p).replaceAll('\\','/'));hash.update(await readFile(p))}
 const version=hash.digest('hex').slice(0,16)
-const assets=paths.map(p=>'./'+path.relative(dist,p).replaceAll('\\','/'))
+const assets=paths.filter(p=>!p.endsWith(path.join('content','catalog.json'))).map(p=>'./'+path.relative(dist,p).replaceAll('\\','/'))
 const sw=`
 const PREFIX='sai-art-player-';
 const CACHE=PREFIX+'${version}';
@@ -23,7 +23,7 @@ self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(asset=>new Request(new URL(asset,self.registration.scope),{cache:'reload'})))));
 });
 self.addEventListener('activate',event=>{
- event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith(PREFIX)&&key!==CACHE)await caches.delete(key);await self.clients.claim()})());
+ event.waitUntil((async()=>{const keys=(await caches.keys()).filter(key=>key.startsWith(PREFIX)&&key!==CACHE);for(const key of keys.slice(0,Math.max(0,keys.length-1)))await caches.delete(key);await self.clients.claim()})());
 });
 self.addEventListener('message',event=>{if(event.data?.type==='ACTIVATE_UPDATE')self.skipWaiting()});
 self.addEventListener('fetch',event=>{
@@ -35,7 +35,7 @@ self.addEventListener('fetch',event=>{
  if(request.mode==='navigate'){
   event.respondWith(caches.open(CACHE).then(async cache=>(await cache.match(new URL('index.html',self.registration.scope).href,{ignoreVary:true}))||fetch(request)));return;
  }
- if(STATIC.has(url.href))event.respondWith(caches.open(CACHE).then(async cache=>(await cache.match(url.href,{ignoreVary:true}))||fetch(request)));
+ if(STATIC.has(url.href)||url.pathname.startsWith(new URL('assets/',self.registration.scope).pathname))event.respondWith((async()=>{const current=await caches.open(CACHE);return (await current.match(url.href,{ignoreVary:true}))||(await caches.match(url.href,{ignoreVary:true}))||fetch(request)})());
 });
 `;
 await writeFile(path.join(dist,'sw.js'),sw)
