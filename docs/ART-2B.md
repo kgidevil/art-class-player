@@ -4,3 +4,6 @@
 - PWA keeps current + previous app shell and matches hashed assets across caches; worker update detection watches existing installations. Startup fallback provides explicit app cache repair without deleting IndexedDB/localStorage. Existing older blank page may still require one-time unregister; not a guarantee of no future blank screens. Actual upgrade scenario not yet automated.
 - npm audit reports JSON in CI without forced dependency upgrades; findings must be inspected and remediated separately if needed. No assertion of zero vulnerabilities.
 - Windows CI pending; Pages source must be configured by owner. iPad final QA deferred.
+
+## Security follow-up (v0.5.1)
+Run 45967701965: build and timer tests 7/7 passed; audit flagged one high-severity direct development dependency, sharp, via GHSA-f88m-g3jw-g9cj, GHSA-rgj7-g3m4-5g8c, GHSA-wq5f-xc86-pv6w. Audit recommended 0.35.5. Pin sharp to 0.35.5 and make high-severity audit blocking before deployment. Revalidation required; no blanket npm audit fix --force. The package is used in icon build and test fixtures, not the browser runtime.

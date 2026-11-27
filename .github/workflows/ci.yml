@@ -15,9 +15,8 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: npm test
-      - name: Dependency audit (report only)
-        run: npm audit --json
-        continue-on-error: true
+      - name: Dependency audit (high severity gate)
+        run: npm audit --audit-level=high --json
   windows-browser:
     runs-on: windows-latest
     steps:
