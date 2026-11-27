@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "version": 1,
+  "updated": "2026-11-27",
+  "items": [
+    {
+      "id": "pose-tree",
+      "title": "한 발로 서 있는 자세",
+      "category": "크로키",
+      "tag": "서기",
+      "level": "중급",
+      "author": "BodyBendYoga/Nappy.co",
+      "license": "CC0-1.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Woman_yoga_pose.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Woman_yoga_pose.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "pose-balance",
+      "title": "상체를 숙인 균형 자세",
+      "category": "크로키",
+      "tag": "서기",
+      "level": "고급",
+      "author": "MilenaGlebova1989",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Standing_yoga_staff_pose.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Standing_yoga_staff_pose.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "pose-seated",
+      "title": "앉아서 팔을 뻗는 자세",
+      "category": "크로키",
+      "tag": "앉기",
+      "level": "기초",
+      "author": "Shixart1985 (Nenad Stojković)",
+      "license": "CC-BY-2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Woman_practices_yoga_while_seated_in_a_living_room.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Woman_practices_yoga_while_seated_in_a_living_room.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "pose-dance",
+      "title": "현대무용의 균형 동작",
+      "category": "크로키",
+      "tag": "동작",
+      "level": "중급",
+      "author": "Dancermorgan",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Modern_dancer_1.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Modern_dancer_1.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "pose-woodland",
+      "title": "숲속에서 팔을 뻗는 뒷모습",
+      "category": "크로키",
+      "tag": "동작",
+      "level": "중급",
+      "author": "AlfrescoBallet",
+      "license": "CC0-1.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Woodland_dance.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/0/03/Woodland_dance.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "portrait-chair",
+      "title": "의자에 앉은 인물",
+      "category": "인물화",
+      "tag": "일상",
+      "level": "중급",
+      "author": "Shixart1985 (Nenad Stojković)",
+      "license": "CC-BY-2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Man_sits_on_chair_using_smartphone_in_outdoor_setting.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/e/ea/Man_sits_on_chair_using_smartphone_in_outdoor_setting.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "land-river",
+      "title": "가을 강과 자갈",
+      "category": "풍경화",
+      "tag": "강",
+      "level": "중급",
+      "author": "Mshuang2",
+      "license": "CC0-1.0",
+      "source": "https://commons.wikimedia.org/wiki/File:River_landscape_with_rocks_and_trees.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/e/e0/River_landscape_with_rocks_and_trees.jpg",
+      "added": "2026-11-27"
+    },
+    {
+      "id": "land-lake",
+      "title": "산과 숲, 호수의 반영",
+      "category": "풍경화",
+      "tag": "호수",
+      "level": "기초",
+      "author": "Dev Vora",
+      "license": "CC-BY-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Landscape_with_mountain%2C_forest_and_lake_with_reflection.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Landscape_with_mountain,_forest_and_lake_with_reflection.jpg",
+      "added": "2026-11-27"
+    }
+  ]
+}

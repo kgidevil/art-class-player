@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test'
+import sharp from 'sharp'
 const png=Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="96"><rect width="64" height="96" fill="#999"/></svg>')
 test('imports, pause, extend, resume, next, finish',async({page})=>{
  await page.goto('./');await expect(page.getByRole('button',{name:'수업 시작'})).toBeDisabled()
@@ -68,4 +69,21 @@ test('offline reload with service worker, persisted photos and playback',async({
   await expect(page.getByRole('img',{name:'offline.svg'})).toBeVisible()
   await expect(page.getByRole('button',{name:'일시정지'})).toBeVisible()
  }catch(error){console.error('Offline diagnostics:',diagnostics,await page.locator('body').innerText().catch(()=>''));throw error}finally{await context.setOffline(false)}
+})
+
+test('curated catalog filters, downloads, attribution and offline category playback',async({page,context})=>{
+ const fixture=await sharp({create:{width:64,height:96,channels:3,background:'#999'}}).png().toBuffer()
+ await page.route('https://upload.wikimedia.org/**',route=>route.fulfill({status:200,contentType:'image/png',headers:{'access-control-allow-origin':'*'},body:fixture}))
+ await page.goto('./')
+ await expect(page.getByText('전체 8장 · 미저장 8장')).toBeVisible()
+ await page.getByRole('button',{name:'자료 둘러보기'}).click()
+ await page.getByLabel('제공 자료 주제').selectOption('풍경화')
+ await expect(page.locator('.catalog-card')).toHaveCount(2)
+ await expect(page.locator('.catalog-card').first().getByText('CC0-1.0')).toBeVisible()
+ await page.getByRole('button',{name:'선택 주제 미저장 2장 받기'}).click()
+ await expect(page.getByText('제공 자료 2장 저장')).toBeVisible()
+ await expect(page.getByRole('button',{name:'기기 저장 완료'})).toHaveCount(2)
+ await expect(page.getByTestId('offline-status')).toHaveText('오프라인 사용 준비 완료',{timeout:20000})
+ await context.setOffline(true)
+ try{await page.reload();await expect(page.getByLabel('재생 자료 범위')).toBeVisible();await page.getByLabel('재생 자료 범위').selectOption('제공 자료');await page.getByLabel('재생 주제').selectOption('풍경화');await page.getByRole('button',{name:'수업 시작'}).click();await expect(page.locator('.reference')).toBeVisible();await expect(page.locator('.filename .credits')).toBeVisible()}finally{await context.setOffline(false)}
 })

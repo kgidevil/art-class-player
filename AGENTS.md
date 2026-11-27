@@ -25,3 +25,6 @@ React + TypeScript + Vite PWA, GitHub Pages project base `/art-class-player/`. I
 - ART 1B: offline/PWA persistence and Windows browser testing. iPad hardware validation deferred to final QA.
 - Deploy Pages only after Windows and build tests pass. Never claim deployment until verified.
 - Keep changes small, test, and report limitations.
+
+## Curated content policy
+Maintain public/content/catalog.json as versioned content. Stable unique IDs; retain credits, source, license and category for each item. Inspect file-level license and visual suitability before publishing; never scrape unreviewed search results or imply personality/model releases. Keep personal uploads private. Prioritize clear fully clothed full-body pose photographs and varied landscapes. Do not claim continuous automatic publishing until scheduled workflow and delivery have been verified.

@@ -8,8 +8,10 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 | ART 0A | Repo setup, technical risk review, React/TS/Vite skeleton | Structure and documentation committed; build requires CI confirmation |
 | ART 1A | Multi-image import, interval timer, full-screen presentation, pause/next/+time | Image advances on schedule; no unwanted crop; teacher can override |
 | ART 1B | PWA, offline asset cache, local image storage, safe resume, Pages | Windows offline and recovery tests; final iPad QA deferred |
-| ART 2A | Categories, tags, difficulty, favorites, de-duplication | Filter and find images locally |
-| ART 2B | Classes, usage history, lesson plans, presets, smart no-repeat | Cheongun and Danwol histories independent |
+| ART 2A | Curated reference catalog, downloads, category/difficulty/search, local photo separation | Verified content metadata, category playback, offline saved reference |
+| ART 2B | Independent catalog updates, download improvements, favorites, user tags, storage optimization | New content without application code changes |
+| ART 2C | Recurring curation and publication workflow | Rights-reviewed content packs; explicit schedule and tested publication |
+| ART 2D | Classes, usage history, lesson plans, presets, smart no-repeat | Cheongun and Danwol histories independent |
 | ART 3A | Grayscale, tone steps, grid, flip, zoom and image adjustments | Edits never alter original |
 | ART 3B | Presenter controls, next-slide preview, optional drawing overlay | Verified feasible on supported devices |
 | ART 4A | Backup/restore, long-session QA and memory tuning | 3-hour real-class projection test |
@@ -43,5 +45,6 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 ## Stage status
 - ART 0A: complete (CI build).
 - ART 1A: complete (CI 9/9 functional tests, user 10/10).
-- ART 1B: user-reported Windows 10/10 pass; first CI 3/4 browser tests passed; offline cache follow-up and deployment verification pending.
+- ART 1B: Windows user 10/10 and CI 4/4 browser tests passed; Pages activation blocked (configure-pages 404).
+- ART 2A: catalog pilot and local download implementation; CI and live download verification pending.
 - iPad, HDMI and long-session verification: ART 4A final hardware QA, per user request.

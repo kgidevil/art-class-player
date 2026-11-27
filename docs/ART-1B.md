@@ -16,3 +16,6 @@
 ## User validation — 2026-11-27
 User-reported Windows manual tests: **10/10 PASS** on 79f27236: brand/UI; photo persistence across reload and browser restart; settings; recovery prompt; paused time/image recovery; resume/automatic transition; persistent deletion; offline reload and offline playback.
 Initial automated run 45965677514: build and 7 unit tests passed; Windows E2E 3/4 passed, offline reload failed after network emulation, so Pages deployment skipped. Manual localhost testing does not establish that all network requests were blocked. Follow-up hardens precache URL matching for known static assets (including Vary headers), fingerprints the worker generator itself, and adds service-worker response assertion and error diagnostics to the offline test. Revalidation pending; root cause not yet proven.
+
+## Follow-up validation
+Run 45966412899 at 1542470: build and 7 unit tests passed; Windows Chromium 4/4 passed, including strict offline reload. User Windows 10/10 confirmed. Pages deployment failed at configure-pages because repository Pages site was not enabled (404); enable Settings > Pages > Source > GitHub Actions. No live deployment confirmed. iPad hardware QA remains deferred.

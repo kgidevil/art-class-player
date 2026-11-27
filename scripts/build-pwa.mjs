@@ -29,6 +29,9 @@ self.addEventListener('message',event=>{if(event.data?.type==='ACTIVATE_UPDATE')
 self.addEventListener('fetch',event=>{
  const request=event.request;const url=new URL(request.url);
  if(request.method!=='GET'||url.origin!==self.location.origin||!url.href.startsWith(self.registration.scope))return;
+ if(url.href===new URL('content/catalog.json',self.registration.scope).href){
+  event.respondWith((async()=>{const cache=await caches.open('sai-catalog-live-v1');try{const fresh=await fetch(request,{cache:'no-store'});if(fresh.ok){await cache.put(url.href,fresh.clone());return fresh}}catch{}return (await cache.match(url.href,{ignoreVary:true}))||(await (await caches.open(CACHE)).match(url.href,{ignoreVary:true}))||new Response('Unavailable',{status:503})})());return;
+ }
  if(request.mode==='navigate'){
   event.respondWith(caches.open(CACHE).then(async cache=>(await cache.match(new URL('index.html',self.registration.scope).href,{ignoreVary:true}))||fetch(request)));return;
  }

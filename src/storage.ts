@@ -1,5 +1,6 @@
 import type { Clock } from './timer'
-export type StoredPhoto = { id: number; name: string; blob: Blob }
+import type { CatalogItem } from './catalog'
+export type StoredPhoto = { id: number; name: string; blob: Blob; reference?: CatalogItem }
 export type Settings = { seconds:number; custom:string; random:boolean; sound:boolean; showTimer:boolean; background:string }
 export type SavedSession = { ids:number[]; clock:Clock; savedAt:number }
 const DB='sai-art-class-player'

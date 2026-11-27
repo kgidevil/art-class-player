@@ -1,0 +1,9 @@
+# ART 2A — curated SAI library pilot
+
+User changed the product priority to instructor-ready content continuously curated for them, not manual photo collection. Implemented a versioned catalog at public/content/catalog.json with 8 real Wikimedia Commons reference photos (5 croquis, 1 portrait, 2 landscapes). Each source page and individual photo were inspected, and per-file copyright license/credit preserved. Files are not cropped or transformed; original blob downloads use CORS and local IndexedDB. Not all pose references have a plain studio backdrop or visible feet; the seated portrait is intentionally cropped by the original photographer. Portrait/personality rights are distinct from copyright; references are for drawing observation, not endorsement. No guarantee of model releases.
+
+- Catalog opens separately from private images. Category, difficulty, search, bulk and individual download, duplicate catalog ID prevention, persistent attribution, category playback.
+- Catalog is network-first with cached fallback; revision increments must be monotonic. New manifest can be published without changing application code. Download is explicitly initiated to avoid unbounded storage growth. External Wikimedia availability, bandwidth and browser CORS remain dependencies until a same-origin publishing pipeline is established.
+- Automatic Windows test mocks image bytes for deterministic storage/replay verification; real external downloads and actual Pages publishing not yet verified by CI.
+- ART 2B: robust update/delivery pipeline and user tags/favorites. ART 2C: scheduled curated publication with verified rights and image quality. No recurring automation created yet.
+- ART 1B Windows validations passed; Pages setup requires repository owner to enable Actions source. iPad hardware QA deferred.
