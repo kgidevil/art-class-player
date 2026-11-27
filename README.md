@@ -23,7 +23,7 @@ GitHub Actions에서 Linux 빌드 및 타이머 단위 테스트와 Windows Chro
 - 발표는 미러링용 화면으로 독립 외부 디스플레이가 아닙니다.
 - 탭이 숨겨지면 일시정지합니다. 실제 iPad 화면 잠금/외부 출력은 최종 실기기 검증 대상입니다.
 - 사용자 사진은 공개 저장소에 등록하지 않습니다.
-- 로고 경로: public/sai-logo.jpg (없을 때 SAI 글자 표시).
+- 로고 경로: public/sai-logo.jpg (첨부 로고의 240px 축소 JPEG, 원본 해상도 파일은 미등록).
 - GitHub Pages는 아직 활성화 확인 전입니다.
 
 [개발 규칙](AGENTS.md) · [로드맵](ROADMAP.md)
