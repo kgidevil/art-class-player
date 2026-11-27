@@ -21,9 +21,17 @@ export function validateCatalog(c){
  for(const i of c.items){checkItem(i);const s=sourceKey(i.source),m=imageKey(i.image);if(ids.has(i.id)||sources.has(s)||images.has(m)||(i.sha256&&hashes.has(i.sha256))||(i.commonsSha1&&sha1s.has(i.commonsSha1)))throw Error('duplicate catalog item: '+i.id);ids.add(i.id);sources.add(s);images.add(m);if(i.sha256)hashes.add(i.sha256);if(i.commonsSha1)sha1s.add(i.commonsSha1)}
  return c
 }
+// API URLs may include tracking parameters or HTTP scheme. Compare the exact
+// Commons original host/path only; the actual download always uses the reviewed HTTPS URL.
+export function liveImageKey(s){
+ const u=new URL(s)
+ if(!['https:','http:'].includes(u.protocol)||u.hostname!=='upload.wikimedia.org'||u.port||u.username||u.password)throw Error('invalid live image host')
+ u.protocol='https:';u.search='';u.hash=''
+ return imageKey(u.href)
+}
 export function checkLive(item,info){
  checkItem(item,true)
- if(!info||imageKey(info.url)!==imageKey(item.image)||!['image/jpeg','image/png','image/webp'].includes(info.mime)||!Number.isInteger(info.size)||info.size<1||info.size>maxBytes||info.width!==item.review.width||info.height!==item.review.height)throw Error('live file differs from review or exceeds limits')
+ if(!info||liveImageKey(info.url)!==imageKey(item.image)||!['image/jpeg','image/png','image/webp'].includes(info.mime)||!Number.isInteger(info.size)||info.size<1||info.size>maxBytes||info.width!==item.review.width||info.height!==item.review.height)throw Error('live file differs from review or exceeds limits')
  const license=info.extmetadata?.LicenseUrl?.value
  if(typeof license!=='string'||license.replace(/^http:/,'https:').replace(/\/deed\.[a-z-]+$/,'/').replace(/\/?$/,'/')!==licenses[item.license])throw Error('license mismatch')
  if(!info.extmetadata?.Artist?.value?.trim()||!info.sha1||!/^[a-z0-9]{1,40}$/.test(info.sha1))throw Error('live author or hash missing')

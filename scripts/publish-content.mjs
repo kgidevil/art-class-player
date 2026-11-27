@@ -41,6 +41,7 @@ const accepted=[],rejected=[]
 for(const item of pending.slice(0,45)){
  try{
   const info=metadata.get(sourceKey(item.source))
+  console.log('LIVE',item.id,JSON.stringify({url:info?.url,mime:info?.mime,width:info?.width,height:info?.height,size:info?.size,license:info?.extmetadata?.LicenseUrl?.value,sha1:info?.sha1}))
   checkLive(item,info)
   if(seenSources.has(sourceKey(item.source))||seenImages.has(imageKey(item.image))||sha1s.has(info.sha1))throw Error('duplicate source or SHA1')
   const res=await fetch(item.image,{headers,redirect:'error',signal:AbortSignal.timeout(60000)})
