@@ -12,3 +12,7 @@
 - Automated Windows Chromium: previous two regression flows plus persistence/recovery/delete and offline reload/playback.
 - Actual Windows browser user test pending; iPad Safari, PWA installation, wake lock, HDMI and 3-hour test deferred to ART 4A.
 - Pages activation and live URL require actual deployment verification; not assumed.
+
+## User validation — 2026-11-27
+User-reported Windows manual tests: **10/10 PASS** on 79f27236: brand/UI; photo persistence across reload and browser restart; settings; recovery prompt; paused time/image recovery; resume/automatic transition; persistent deletion; offline reload and offline playback.
+Initial automated run 45965677514: build and 7 unit tests passed; Windows E2E 3/4 passed, offline reload failed after network emulation, so Pages deployment skipped. Manual localhost testing does not establish that all network requests were blocked. Follow-up hardens precache URL matching for known static assets (including Vary headers), fingerprints the worker generator itself, and adds service-worker response assertion and error diagnostics to the offline test. Revalidation pending; root cause not yet proven.

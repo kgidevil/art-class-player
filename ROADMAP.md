@@ -43,5 +43,5 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 ## Stage status
 - ART 0A: complete (CI build).
 - ART 1A: complete (CI 9/9 functional tests, user 10/10).
-- ART 1B: implementation, automated validation and Pages deployment in progress.
+- ART 1B: user-reported Windows 10/10 pass; first CI 3/4 browser tests passed; offline cache follow-up and deployment verification pending.
 - iPad, HDMI and long-session verification: ART 4A final hardware QA, per user request.

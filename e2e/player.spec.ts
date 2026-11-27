@@ -55,13 +55,17 @@ test('offline reload with service worker, persisted photos and playback',async({
  await expect(page.getByTestId('offline-status')).toHaveText('오프라인 사용 준비 완료',{timeout:20000})
  await page.getByLabel('사진 가져오기').setInputFiles([{name:'offline.svg',mimeType:'image/svg+xml',buffer:png}])
  await expect(page.getByText('1장 추가')).toBeVisible()
+ const diagnostics:string[]=[]
+ page.on('pageerror',e=>diagnostics.push(e.message))
+ page.on('requestfailed',r=>diagnostics.push(r.url()+': '+r.failure()?.errorText))
  await context.setOffline(true)
  try{
-  await page.reload()
-  await expect(page.getByRole('img',{name:'offline.svg'})).toBeVisible()
+  const response=await page.reload()
+  expect(response?.fromServiceWorker()).toBe(true)
+  await expect(page.getByRole('img',{name:'offline.svg'})).toBeVisible({timeout:10000})
   await expect(page.getByText('오프라인',{exact:true})).toBeVisible()
   await page.getByRole('button',{name:'수업 시작'}).click()
   await expect(page.getByRole('img',{name:'offline.svg'})).toBeVisible()
   await expect(page.getByRole('button',{name:'일시정지'})).toBeVisible()
- }finally{await context.setOffline(false)}
+ }catch(error){console.error('Offline diagnostics:',diagnostics,await page.locator('body').innerText().catch(()=>''));throw error}finally{await context.setOffline(false)}
 })
