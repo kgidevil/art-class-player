@@ -35,3 +35,6 @@ GitHub Actions에서 Linux 빌드 및 타이머 단위 테스트와 Windows Chro
 자료 둘러보기 → 주제/난이도 선택 → 기기에 저장 → 재생 자료 범위에서 제공 자료 선택. 최초 목록 확인 및 사진 다운로드는 인터넷 연결 필요. 저장한 이미지는 오프라인에서 재생할 수 있습니다. 자료는 Wikimedia Commons의 개별 파일별 라이선스를 확인한 파일이며 작가·출처·라이선스를 표시합니다. 외부 서버 다운로드가 실패하면 재시도 안내가 표시됩니다. 정기 콘텐츠 자동 게시 작업은 아직 설정하지 않았습니다.
 
 ART 2B: 신규 자료 자동 다운로드는 선택 설정이며, 앱 시작/재연결/15분 간격으로 최신 GitHub 자료 목록을 조회합니다. 제공 사진 즐겨찾기 및 용량 표시 지원. [개발 문서](docs/ART-2B.md). 정기 자료 발행은 ART 2C에서 구성합니다.
+
+## ART 2C: SAI 정기 콘텐츠 공급
+검토된 신규 자료는 `content/approved.json`에 추가하고 GitHub Actions의 SAI reviewed content publication 작업에서 파일별 원본 URL, 라이선스, 해상도, 크기, 다운로드 및 중복 검사를 거쳐 `public/content/catalog.json`에 게시합니다. 앱은 기존 ART 2B 버전에서 최신 목록을 받을 수 있습니다. [정기 큐레이션 운영 규칙](docs/ART-2C.md).

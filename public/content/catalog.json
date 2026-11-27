@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": 2,
+  "version": 3,
   "updated": "2026-11-27",
   "items": [
     {
@@ -158,6 +158,253 @@
       "source": "https://commons.wikimedia.org/wiki/File:%EA%B2%BD%EB%B3%B5%EA%B6%81%EA%B2%BD%ED%9A%8C%EB%A3%A8.jpg",
       "image": "https://upload.wikimedia.org/wikipedia/commons/d/d6/%EA%B2%BD%EB%B3%B5%EA%B6%81%EA%B2%BD%ED%9A%8C%EB%A3%A8.jpg",
       "added": "2026-11-27"
+    },
+    {
+      "id": "pose-warrior-two",
+      "title": "양팔을 펼친 런지 자세",
+      "category": "크로키",
+      "tag": "서기·런지",
+      "level": "기초",
+      "author": "lululemon athletica",
+      "license": "CC-BY-2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Yoga_Warrior_I.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/8/88/Yoga_Warrior_I.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "흰 배경, 전신과 양팔·발이 잘 보임",
+        "width": 2000,
+        "height": 1886
+      }
+    },
+    {
+      "id": "pose-standing-arch",
+      "title": "상체를 뒤로 젖힌 측면 자세",
+      "category": "크로키",
+      "tag": "측면·서기",
+      "level": "중급",
+      "author": "Mr. Yoga",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Mr-yoga-standing-locust-pose.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Mr-yoga-standing-locust-pose.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "밝은 단순 배경, 측면 곡선과 무게중심",
+        "width": 884,
+        "height": 1200
+      }
+    },
+    {
+      "id": "pose-sunset-silhouette",
+      "title": "노을 속 한 발 균형 실루엣",
+      "category": "크로키",
+      "tag": "실루엣·균형",
+      "level": "고급",
+      "author": "Mayordeeliteman",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Yoga_Pose.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/d/d2/Yoga_Pose.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "전신 실루엣, 관절 세부보다 동세 연습용",
+        "width": 2400,
+        "height": 3600
+      }
+    },
+    {
+      "id": "animal-gray-cat",
+      "title": "회색 고양이 얼굴과 앞발",
+      "category": "동물화",
+      "tag": "고양이·부분",
+      "level": "중급",
+      "author": "Rbrajesh",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Cat_sitting.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Cat_sitting.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "얼굴과 앞발 중심, 부분 묘사",
+        "width": 2448,
+        "height": 3264
+      }
+    },
+    {
+      "id": "animal-garden-kitten",
+      "title": "풀밭에 엎드린 고양이",
+      "category": "동물화",
+      "tag": "고양이·엎드리기",
+      "level": "중급",
+      "author": "Ondřej Geršl",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Cat_sitting_at_garden.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/2/22/Cat_sitting_at_garden.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "역광과 털 표현",
+        "width": 4032,
+        "height": 3024
+      }
+    },
+    {
+      "id": "animal-two-cats",
+      "title": "나란히 앉은 두 고양이",
+      "category": "동물화",
+      "tag": "고양이·군상",
+      "level": "중급",
+      "author": "KKPCW",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Two_cats_sitting_with_beautiful_posture.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/b/be/Two_cats_sitting_with_beautiful_posture.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "두 개체의 앉은 자세 비교",
+        "width": 1800,
+        "height": 1350
+      }
+    },
+    {
+      "id": "animal-tabby-seat",
+      "title": "나무 아래 앉은 줄무늬 고양이",
+      "category": "동물화",
+      "tag": "고양이·측면",
+      "level": "중급",
+      "author": "Asabae2752",
+      "license": "CC0-1.0",
+      "source": "https://commons.wikimedia.org/wiki/File:A_photo_of_a_cat_sitting_down.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/7/7b/A_photo_of_a_cat_sitting_down.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "몸통, 꼬리와 앞다리 윤곽",
+        "width": 3264,
+        "height": 2448
+      }
+    },
+    {
+      "id": "land-meadow",
+      "title": "노란 초원과 먼 설산",
+      "category": "풍경화",
+      "tag": "초원·하늘",
+      "level": "기초",
+      "author": "Bonnie Moreland",
+      "license": "CC0-1.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Meadow_Landscape_Field.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Meadow_Landscape_Field.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "전경·중경·원경 구분",
+        "width": 4635,
+        "height": 2735
+      }
+    },
+    {
+      "id": "land-turquoise",
+      "title": "푸른 물과 산의 세로 구도",
+      "category": "풍경화",
+      "tag": "호수·원근",
+      "level": "중급",
+      "author": "Xabibulla Muxamedov",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:The_landscape_of_mountain_and_river.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/6/6f/The_landscape_of_mountain_and_river.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "하늘, 산, 녹음, 푸른 물의 층",
+        "width": 2268,
+        "height": 4032
+      }
+    },
+    {
+      "id": "land-green-hills",
+      "title": "초록 들판과 바위산",
+      "category": "풍경화",
+      "tag": "들판·산",
+      "level": "기초",
+      "author": "UmarMusa9539",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Mountain_and_Hills_landscape.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Mountain_and_Hills_landscape.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "단순한 산 실루엣과 녹색 명암",
+        "width": 1732,
+        "height": 1154
+      }
+    },
+    {
+      "id": "land-river-valley",
+      "title": "산 사이로 흐르는 강",
+      "category": "풍경화",
+      "tag": "계곡·원근",
+      "level": "중급",
+      "author": "D Aamna Khan",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:River_along_mountains.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/f/f3/River_along_mountains.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "계곡의 공간 깊이와 명암",
+        "width": 4608,
+        "height": 3456
+      }
+    },
+    {
+      "id": "still-apple-bowl",
+      "title": "나무 그릇에 담긴 사과",
+      "category": "정물화",
+      "tag": "과일·명암",
+      "level": "기초",
+      "author": "Alonso Anderson",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Apples_still_life.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/8/85/Apples_still_life.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "단순 배경, 강한 측광과 구형",
+        "width": 2144,
+        "height": 1424
+      }
+    },
+    {
+      "id": "still-pastry-light",
+      "title": "빛을 받는 페이스트리 정물",
+      "category": "정물화",
+      "tag": "음식·색채",
+      "level": "중급",
+      "author": "Robertgombos",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Still_Life_Photography.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/6/66/Still_Life_Photography.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "전경과 배경의 색온도 대비",
+        "width": 6000,
+        "height": 4000
+      }
     }
   ]
 }

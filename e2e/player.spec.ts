@@ -74,34 +74,38 @@ test('offline reload with service worker, persisted photos and playback',async({
 
 test('curated catalog filters, downloads, attribution and offline category playback',async({page,context})=>{
  await page.route('https://raw.githubusercontent.com/kgidevil/art-class-player/**',route=>route.abort())
+ const catalog=JSON.parse(await (await import('node:fs/promises')).readFile('public/content/catalog.json','utf8'))
+ const count=catalog.items.length;const landscapes=catalog.items.filter((i:{category:string})=>i.category==='풍경화').length;const batch=Math.min(20,landscapes)
  const fixture=await sharp({create:{width:64,height:96,channels:3,background:'#999'}}).png().toBuffer()
  await page.route('https://upload.wikimedia.org/**',route=>route.fulfill({status:200,contentType:'image/png',headers:{'access-control-allow-origin':'*'},body:fixture}))
  await page.goto('./')
- await expect(page.getByText('전체 13장 · 미저장 13장')).toBeVisible()
+ await expect(page.getByText('전체 '+count+'장 · 미저장 '+count+'장')).toBeVisible()
  await page.getByRole('button',{name:'자료 둘러보기'}).click()
  await page.getByLabel('제공 자료 주제').selectOption('풍경화')
- await expect(page.locator('.catalog-card')).toHaveCount(4)
+ await expect(page.locator('.catalog-card')).toHaveCount(landscapes)
  await expect(page.locator('.catalog-card').first().getByText('CC0-1.0')).toBeVisible()
- await page.getByRole('button',{name:'선택 주제 미저장 4장 받기'}).click()
- await expect(page.getByText('제공 자료 4장 저장')).toBeVisible()
- await expect(page.getByRole('button',{name:'기기 저장 완료'})).toHaveCount(4)
+ await page.getByRole('button',{name:'선택 주제 미저장 '+batch+'장 받기'}).click()
+ await expect(page.getByText('제공 자료 '+batch+'장 저장')).toBeVisible()
+ await expect(page.getByRole('button',{name:'기기 저장 완료'})).toHaveCount(batch)
  await expect(page.getByTestId('offline-status')).toHaveText('오프라인 사용 준비 완료',{timeout:20000})
  await context.setOffline(true)
  try{await page.reload();await expect(page.getByLabel('재생 자료 범위')).toBeVisible();await page.getByLabel('재생 자료 범위').selectOption('제공 자료');await page.getByLabel('재생 주제').selectOption('풍경화');await page.getByRole('button',{name:'수업 시작'}).click();await expect(page.locator('.reference')).toBeVisible();await expect(page.locator('.filename .credits')).toBeVisible()}finally{await context.setOffline(false)}
 })
 
 test('favorites, remote catalog revision, opt-in auto download and persistence',async({page})=>{
+ test.setTimeout(90000)
  const catalog=JSON.parse(await (await import('node:fs/promises')).readFile('public/content/catalog.json','utf8'))
- catalog.version=3
+ catalog.version+=1
+ const count=catalog.items.length
  const fixture=await sharp({create:{width:64,height:96,channels:3,background:'#999'}}).png().toBuffer()
  await page.route('https://raw.githubusercontent.com/kgidevil/art-class-player/**',r=>r.fulfill({json:catalog,headers:{'access-control-allow-origin':'*'}}))
  await page.route('https://upload.wikimedia.org/**',r=>r.fulfill({contentType:'image/png',headers:{'access-control-allow-origin':'*'},body:fixture}))
- await page.goto('./');await expect(page.getByText(/자료팩 v3/)).toBeVisible()
+ await page.goto('./');await expect(page.getByText(new RegExp('자료팩 v'+catalog.version+' ·'))).toBeVisible()
  await page.getByRole('button',{name:'자료 둘러보기'}).click()
  await page.getByRole('button',{name:'한 발로 서 있는 자세 즐겨찾기'}).click()
  await page.getByLabel('즐겨찾기만').check();await expect(page.locator('.catalog-card')).toHaveCount(1)
  await page.getByLabel('신규 자료 자동 다운로드').check()
- await expect(page.getByText('전체 13장 · 미저장 0장')).toBeVisible({timeout:30000})
+ await expect(page.getByText('전체 '+count+'장 · 미저장 0장')).toBeVisible({timeout:60000})
  await page.reload();await expect(page.getByLabel('신규 자료 자동 다운로드')).toBeChecked()
  await page.getByRole('button',{name:'자료 둘러보기'}).click();await page.getByLabel('즐겨찾기만').check()
  await expect(page.locator('.catalog-card')).toHaveCount(1)

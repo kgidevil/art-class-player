@@ -28,3 +28,6 @@ React + TypeScript + Vite PWA, GitHub Pages project base `/art-class-player/`. I
 
 ## Curated content policy
 Maintain public/content/catalog.json as versioned content. Stable unique IDs; retain credits, source, license and category for each item. Inspect file-level license and visual suitability before publishing; never scrape unreviewed search results or imply personality/model releases. Keep personal uploads private. Prioritize clear fully clothed full-body pose photographs and varied landscapes. Do not claim continuous automatic publishing until scheduled workflow and delivery have been verified.
+
+## ART 2C publication
+Use content/approved.json for visually inspected candidates only. Do not bypass live verification when publishing scheduled additions. Preserve existing IDs and entries, avoid near duplicates visually, note framing limitations, report failures and actual published count. Read docs/ART-2C.md. Do not force-push or alter unrelated app files.

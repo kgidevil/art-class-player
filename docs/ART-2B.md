@@ -7,3 +7,6 @@
 
 ## Security follow-up (v0.5.1)
 Run 45967701965: build and timer tests 7/7 passed; audit flagged one high-severity direct development dependency, sharp, via GHSA-f88m-g3jw-g9cj, GHSA-rgj7-g3m4-5g8c, GHSA-wq5f-xc86-pv6w. Audit recommended 0.35.5. Pin sharp to 0.35.5 and make high-severity audit blocking before deployment. Revalidation required; no blanket npm audit fix --force. The package is used in icon build and test fixtures, not the browser runtime.
+
+## Final Windows validation
+Stable commit b292b2a, run 45967819488: production build, timer 7/7, Windows Chromium 6/6 and high-severity npm audit passed. User-reported 12/12 passed, including prior data preservation, automatic updates/downloads, favorites, storage, offline playback, and security warning resolved. Pages configure-pages failed; deployment not verified.
