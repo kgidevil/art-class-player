@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": 3,
+  "version": 4,
   "updated": "2026-11-27",
   "items": [
     {
@@ -405,6 +405,50 @@
         "width": 6000,
         "height": 4000
       }
+    },
+    {
+      "id": "pose-seated-neck",
+      "title": "앉아서 양손을 목 뒤로 올린 자세",
+      "category": "크로키",
+      "tag": "앉기·상체",
+      "level": "중급",
+      "author": "Shixart1985 (Nenad Stojković)",
+      "license": "CC-BY-2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Woman_practicing_yoga_seated_on_a_mat_in_living_room.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/9/94/Woman_practicing_yoga_seated_on_a_mat_in_living_room.jpg",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "팔과 어깨 중심; 원본 왼쪽 무릎 일부 잘림, 전신 비례용 아님",
+        "width": 4032,
+        "height": 6048
+      },
+      "commonsSha1": "29a3eb9e461b5b9cfad08135538fb8ae2ca246b7",
+      "sha256": "93f996ac217892e157e5262f9972f15184d94c1d54777c85f13092c91eac6bbf",
+      "verifiedAt": "2026-11-27"
+    },
+    {
+      "id": "animal-reclining-chair",
+      "title": "소파에 기대 누운 흰 고양이",
+      "category": "동물화",
+      "tag": "고양이·누운 자세",
+      "level": "기초",
+      "author": "Brianga",
+      "license": "CC-BY-SA-4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Domestic_Feline_on_Chair.JPG",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Domestic_Feline_on_Chair.JPG",
+      "added": "2026-11-27",
+      "review": {
+        "date": "2026-11-27",
+        "visual": true,
+        "note": "몸통과 앞발, 누운 동작; 원본 왼쪽 뒷발 일부 잘림",
+        "width": 3072,
+        "height": 2304
+      },
+      "commonsSha1": "2b9e558639efbf701a44427f76132230b5a9fe8d",
+      "sha256": "ce6e7b146cd0c67a95278957d7bc22daf0ba1b9deea5bf7f5c74ad5bfcef7ff5",
+      "verifiedAt": "2026-11-27"
     }
   ]
 }
