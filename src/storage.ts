@@ -1,8 +1,9 @@
 import type { Clock } from './timer'
+import type {SessionMeta} from './lesson'
 import type { CatalogItem } from './catalog'
 export type StoredPhoto = { id: number; name: string; blob: Blob; reference?: CatalogItem }
 export type Settings = { seconds:number; custom:string; random:boolean; sound:boolean; showTimer:boolean; background:string }
-export type SavedSession = { ids:number[]; clock:Clock; savedAt:number }
+export type SavedSession = { ids:number[]; clock:Clock; savedAt:number; meta?:SessionMeta }
 const DB='sai-art-class-player'
 const STORE='photos'
 const SETTINGS='sai.settings.v1'
@@ -49,6 +50,9 @@ export function readSession():SavedSession|null{
     if(!v||!Array.isArray(v.ids)||!v.ids.length||!v.ids.every(Number.isSafeInteger)||new Set(v.ids).size!==v.ids.length)return null
     const c=v.clock
     if(!c||c.finished||c.count!==v.ids.length||!Number.isInteger(c.index)||c.index<0||c.index>=c.count||!Number.isFinite(c.duration)||c.duration<=0||!Number.isFinite(c.remaining)||c.remaining<0)return null
+    if(c.durations&&(!Array.isArray(c.durations)||c.durations.length!==c.count||c.durations.some(d=>!Number.isFinite(d)||d<=0)||c.durations[c.index]!==c.duration))return null
+    if(v.ids.some(id=>id<0)&&!c.durations)return null
+    if(v.meta&&(!v.meta.id||typeof v.meta.group!=='string'||typeof v.meta.title!=='string'||!Number.isFinite(v.meta.started)||!Array.isArray(v.meta.viewed)))return null
     return {...v,clock:{...c,deadline:null}}
   }catch{return null}
 }

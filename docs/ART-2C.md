@@ -11,3 +11,6 @@ ART 2B stable v0.5.1 remains compatible. Initial catalog v3: 26 items (13 additi
 
 ## First automated publication attempt
 Run 45968728800: audit found 0 vulnerabilities; content unit tests 5/5 and catalog check (26 unique references) passed. Both queued entries rejected by strict original URL check, no changes to catalog. Follow-up normalizes API-only query/hash and HTTP to HTTPS for path comparison (actual download remains reviewed HTTPS URL), logs source metadata and tests host/path rejection. Exact cause not yet confirmed; retry pending.
+
+## Final live publication verification
+Run 45968867449 succeeded; bot commit 26fd3f2f published 2 verified images (pose-seated-neck and animal-reclining-chair), catalog v4 / 28 items with SHA256. Run 45968867578 build and Windows browser jobs passed; deployment alone failed at configure-pages. Weekly ChatGPT curation is scheduled; future unattended runs not yet demonstrated.

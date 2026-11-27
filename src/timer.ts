@@ -1,13 +1,18 @@
-export type Clock = { index: number; count: number; duration: number; remaining: number; deadline: number | null; finished: boolean }
+export type Clock = { index: number; count: number; duration: number; remaining: number; deadline: number | null; finished: boolean; durations?:number[] }
 export function start(count: number, duration: number, now: number): Clock {
   if (!Number.isInteger(count) || count < 1 || !Number.isFinite(duration) || duration <= 0) throw new Error('Invalid session')
   return { index: 0, count, duration, remaining: duration, deadline: now + duration, finished: false }
+}
+export function startSequence(durations:number[],now:number):Clock {
+ if(!durations.length||durations.some(d=>!Number.isFinite(d)||d<=0))throw Error('Invalid durations')
+ return {...start(durations.length,durations[0],now),durations:[...durations]}
 }
 export function left(c: Clock, now: number) { return c.deadline === null ? c.remaining : Math.max(0, c.deadline - now) }
 export function move(c: Clock, step: number, now: number): Clock {
   const index = Math.max(0, c.index + step)
   if (index >= c.count) return { ...c, deadline: null, remaining: 0, finished: true }
-  return { ...c, index, remaining: c.duration, deadline: c.deadline === null ? null : now + c.duration, finished: false }
+  const duration=c.durations?.[index]??c.duration
+  return { ...c, index, duration, remaining: duration, deadline: c.deadline === null ? null : now + duration, finished: false }
 }
 export function tick(c: Clock, now: number): Clock {
   return c.deadline !== null && now >= c.deadline ? move(c, 1, now) : c

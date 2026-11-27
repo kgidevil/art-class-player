@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { start, left, tick, move, toggle, extend, restart, formatTime, shuffle } from './timer'
+import { start, startSequence, left, tick, move, toggle, extend, restart, formatTime, shuffle } from './timer'
 import type { Clock } from './timer'
 import { addPhotos,readPhotos,deletePhoto,clearPhotos,readSettings,saveSettings,readSession,saveSession } from './storage'
 import type { StoredPhoto,SavedSession } from './storage'
@@ -7,8 +7,13 @@ import {usePwa,useScreenWake} from './pwa'
 import Library,{Credits} from './Library'
 import {categories,downloadReference} from './catalog'
 import type {CatalogItem} from './catalog'
+import LessonPanel from './LessonPanel'
+import {readLessons,writeLessons,prioritize,uid,upsertHistory} from './lesson'
+import type {Entry,Lessons,SessionMeta} from './lesson'
 
-type Photo = { id: number; name: string; url: string; reference?:CatalogItem; bytes:number }
+type Photo = { id: number; name: string; url: string; reference?:CatalogItem; bytes:number; isBreak?:boolean }
+const photoKey=(p:Photo)=>p.reference?'sai:'+p.reference.id:'local:'+p.id+':'+p.name
+const breakPhoto=(id:number):Photo=>({id,name:'휴식 시간',url:'',bytes:0,isBreak:true})
 const presets = [30,60,120,180,300,600,900,1200]
 const durationLabel = (s: number) => s < 60 ? s + '초' : s/60 + '분'
 const logo = import.meta.env.BASE_URL + 'sai-logo.jpg'
@@ -18,9 +23,14 @@ function Brand() {
 }
 export default function App() {
   const [photos,setPhotos] = useState<Photo[]>([])
+  const [lessons,setLessons]=useState(readLessons)
+  const lessonRef=useRef(lessons)
+  const meta=useRef<SessionMeta|null>(null)
+  const logged=useRef('')
   const [source,setSource]=useState('전체')
   const [topic,setTopic]=useState('전체')
   const eligible=photos.filter(p=>(source==='전체'||(source==='제공 자료'?!!p.reference:!p.reference))&&(topic==='전체'||p.reference?.category===topic))
+  const candidates=prioritize(eligible.map(p=>({id:p.id,name:p.name,key:photoKey(p)})),lessons.history,lessons.group,lessons.preferUnused)
   const downloaded=new Map(photos.filter(p=>p.reference).map(p=>[p.reference!.id,p.url]))
   const urls = useRef(new Set<string>())
   const serial = useRef(0)
@@ -57,8 +67,9 @@ export default function App() {
   const wakeStatus=useScreenWake(!!clock&&!clock.finished)
   const snapshot=useRef<SavedSession|null>(null)
   const lastSaved=useRef('')
+  if(clock&&active&&!active.isBreak&&!clock.finished&&meta.current&&!meta.current.viewed.some(v=>v.key===photoKey(active)))meta.current={...meta.current,viewed:[...meta.current.viewed,{id:active.id,name:active.name,key:photoKey(active),duration:clock.duration}]}
   const savedClock=clock&&!clock.finished?{...clock,deadline:null,remaining:left(clock,now)}:null
-  snapshot.current=savedClock?{ids:queue.map(p=>p.id),clock:savedClock,savedAt:now}:recovery
+  snapshot.current=savedClock?{ids:queue.map(p=>p.id),clock:savedClock,savedAt:now,meta:meta.current??undefined}:recovery
 
 
   useEffect(()=>{ const owned = urls.current; return ()=>{owned.forEach(u=>URL.revokeObjectURL(u));owned.clear(); void audio.current?.close().catch(()=>{})} },[])
@@ -67,10 +78,10 @@ export default function App() {
     void readPhotos().then(records=>{
       if(!alive)return
       const restored=records.map(p=>{const url=URL.createObjectURL(p.blob);urls.current.add(url);return {id:p.id,name:p.name,url,reference:p.reference,bytes:p.blob.size}})
-      serial.current=records.reduce((max,p)=>Math.max(max,p.id),0)
+      serial.current=records.reduce((max,p)=>Math.max(max,p.id),Date.now())
       setPhotos(restored)
       const previous=readSession()
-      if(previous&&previous.ids.every(id=>restored.some(p=>p.id===id)))setRecovery(previous)
+      if(previous&&previous.ids.every(id=>id<0||restored.some(p=>p.id===id)))setRecovery(previous)
       else if(previous){setNotice('이전 수업의 이미지가 누락되어 복구할 수 없습니다.');try{saveSession(null)}catch{/* warning below on next write */}}
       setLoaded(true)
     }).catch(()=>{if(alive)setStorageError('사진 저장소를 열 수 없습니다. 브라우저 저장소 설정을 확인한 후 새로고침해 주세요.')})
@@ -80,7 +91,7 @@ export default function App() {
   useEffect(()=>{
     if(!loaded)return
     const s=snapshot.current
-    const key=s?JSON.stringify([s.ids,s.clock.index,s.clock.duration,Math.ceil(s.clock.remaining/1000),clock?.deadline===null]):'none'
+    const key=s?JSON.stringify([s.ids,s.clock.index,s.clock.duration,Math.ceil(s.clock.remaining/1000),clock?.deadline===null,s.meta?.id,s.meta?.viewed.length]):'none'
     if(key===lastSaved.current)return
     try{saveSession(s);lastSaved.current=key}catch{setStorageError('수업 상태를 저장하지 못했습니다. 저장 공간을 확인해 주세요.')}
   },[loaded,clock,now,recovery,queue])
@@ -90,6 +101,17 @@ export default function App() {
     window.addEventListener('pagehide',persist)
     return()=>window.removeEventListener('pagehide',persist)
   },[loaded])
+  function saveLesson(next:Lessons){
+    try{writeLessons(next);lessonRef.current=next;setLessons(next);return true}
+    catch{setStorageError('수업 프로그램 또는 기록을 저장하지 못했습니다.');return false}
+  }
+  function logLesson(status:'complete'|'ended'){
+    const m=meta.current;if(!m||logged.current===m.id)return true
+    const next=upsertHistory(lessonRef.current,{...m,ended:Date.now(),status,note:'',total:queue.filter(p=>!p.isBreak).length})
+    if(!saveLesson(next))return false
+    logged.current=m.id;return true
+  }
+  useEffect(()=>{if(clock?.finished)logLesson('complete')},[clock?.finished])
   async function requestStorage(){
     try{if(!navigator.storage?.persist){setStorageStatus('저장 유지 요청 미지원');return}
       const granted=await navigator.storage.persist();setStorageStatus(granted?'저장 유지 승인됨':'기본 저장 · 브라우저가 삭제할 수 있음')
@@ -99,10 +121,10 @@ export default function App() {
   function resumeRecovery(){
     if(!recovery)return
     const byId=new Map(photos.map(p=>[p.id,p]))
-    const ordered=recovery.ids.map(id=>byId.get(id)).filter((p):p is Photo=>!!p)
+    const ordered=recovery.ids.map(id=>id<0?breakPhoto(id):byId.get(id)).filter((p):p is Photo=>!!p)
     if(ordered.length!==recovery.ids.length){setNotice('이미지가 누락되었습니다.');return}
     const t=Date.now()
-    setQueue(ordered);setNow(t);setClock({...recovery.clock,deadline:null});setRecovery(null);prevIndex.current=-1
+    meta.current=recovery.meta??{id:uid(),group:lessons.group,title:'복구된 수업',started:recovery.savedAt,viewed:[]};logged.current='';setQueue(ordered);setNow(t);setClock({...recovery.clock,deadline:null});setRecovery(null);prevIndex.current=-1
   }
   useEffect(()=>{ if(!clock || clock.deadline === null || clock.finished) return
     const timer=window.setInterval(()=>{const t=Date.now();setNow(t);setClock(c=>c ? tick(c,t) : c)},100)
@@ -115,7 +137,7 @@ export default function App() {
       const a=audio.current;const osc=a.createOscillator();const gain=a.createGain();osc.frequency.value=660;gain.gain.setValueAtTime(.08,a.currentTime);gain.gain.exponentialRampToValueAtTime(.001,a.currentTime+.22);osc.connect(gain).connect(a.destination);osc.start();osc.stop(a.currentTime+.24)
     }prevIndex.current=marker
   },[clock?.index,clock?.finished,sound])
-  useEffect(()=>{const handler=(e:KeyboardEvent)=>{if(!clock || e.repeat || (e.target instanceof HTMLElement && /INPUT|BUTTON|SELECT|TEXTAREA/.test(e.target.tagName)))return;const t=Date.now();if(e.code==='Space'){e.preventDefault();setNow(t);setClock(c=>c?toggle(c,t):c)}else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();setNow(t);setClock(c=>c?move(c,e.key==='ArrowRight'?1:-1,t):c)}else if(e.key==='Escape'){setPresentation(false)}};window.addEventListener('keydown',handler);return ()=>window.removeEventListener('keydown',handler)},[clock])
+  useEffect(()=>{const handler=(e:KeyboardEvent)=>{if(!clock || clock.finished || e.repeat || (e.target instanceof HTMLElement && /INPUT|BUTTON|SELECT|TEXTAREA/.test(e.target.tagName)))return;const t=Date.now();if(e.code==='Space'){e.preventDefault();setNow(t);setClock(c=>c?toggle(c,t):c)}else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();setNow(t);setClock(c=>c?move(c,e.key==='ArrowRight'?1:-1,t):c)}else if(e.key==='Escape'){setPresentation(false)}};window.addEventListener('keydown',handler);return ()=>window.removeEventListener('keydown',handler)},[clock])
   useEffect(()=>{const handler=()=>{if(!document.fullscreenElement)setPresentation(false)};document.addEventListener('fullscreenchange',handler);return ()=>document.removeEventListener('fullscreenchange',handler)},[])
 
   async function importPhotos(files: FileList|null) {
@@ -150,20 +172,28 @@ export default function App() {
   }
   async function remove(id:number){if(busy||recovery||!loaded)return;setBusy(true);try{await deletePhoto(id);const p=photos.find(p=>p.id===id);if(p){URL.revokeObjectURL(p.url);urls.current.delete(p.url)}setPhotos(p=>p.filter(i=>i.id!==id));setNotice('사진을 삭제했습니다.')}catch{setNotice('사진 삭제에 실패했습니다.')}finally{setBusy(false)}}
   async function clear(){if(busy||recovery||!loaded||!window.confirm('기기에 저장된 모든 수업 사진을 삭제할까요?'))return;setBusy(true);try{await clearPhotos();photos.forEach(p=>{URL.revokeObjectURL(p.url);urls.current.delete(p.url)});setPhotos([]);setNotice('모든 사진을 삭제했습니다.')}catch{setNotice('사진 삭제에 실패했습니다.')}finally{setBusy(false)}}
-  function begin(){if(!eligible.length||!valid||busy||!loaded||recovery)return;const t=Date.now();const ordered=random?shuffle(eligible):[...eligible];setQueue(ordered);setNow(t);setClock(start(ordered.length,Math.round(effective*1000),t));prevIndex.current=-1;try{if(sound){audio.current??=new AudioContext();void audio.current.resume().catch(()=>{})}}catch{/* sound is optional */}}
+  function openLesson(ordered:Photo[],durations:number[],title:string){
+    if(!ordered.length||busy||!loaded||recovery)return
+    const t=Date.now();meta.current={id:uid(),group:lessons.group,title,started:t,viewed:[]};logged.current=''
+    setQueue(ordered);setNow(t);setClock(startSequence(durations,t));prevIndex.current=-1
+    try{if(sound){audio.current??=new AudioContext();void audio.current.resume().catch(()=>{})}}catch{/* sound is optional */}
+  }
+  function begin(){if(!eligible.length||!valid||busy||!loaded||recovery)return;const byId=new Map(eligible.map(p=>[p.id,p]));const sorted=prioritize(random?shuffle(candidates):candidates,lessons.history,lessons.group,lessons.preferUnused);const ordered=sorted.map(p=>byId.get(p.id)!);openLesson(ordered,ordered.map(()=>Math.round(effective*1000)),topic==='전체'?'일반 드로잉':topic)}
+  function beginProgram(entries:Entry[],title:string){const byId=new Map(eligible.map(p=>[p.id,p]));const ordered=entries.map(e=>e.id<0?breakPhoto(e.id):byId.get(e.id));if(ordered.some(p=>!p)){setNotice('사진 목록이 변경되었습니다. 순서를 다시 확인해 주세요.');return}openLesson(ordered as Photo[],entries.map(e=>e.duration),title)}
+  function repeatLesson(){if(!clock||!logLesson('complete'))return;const t=Date.now();meta.current={id:uid(),group:meta.current?.group??lessons.group,title:meta.current?.title??'일반 드로잉',started:t,viewed:[]};logged.current='';setNow(t);setClock(clock.durations?startSequence(clock.durations,t):start(queue.length,clock.duration,t));prevIndex.current=-1}
   function command(fn:(c:Clock,t:number)=>Clock){if(fn===toggle&&sound){try{audio.current??=new AudioContext();void audio.current.resume().catch(()=>{})}catch{/* optional */}}const t=Date.now();setNow(t);setClock(c=>c?fn(c,t):c)}
   async function present(){setPresentation(true);try{if(stage.current?.requestFullscreen)await stage.current.requestFullscreen()}catch{/* CSS presentation remains available */}}
   function exitPresent(){setPresentation(false);if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{})}
-  function end(){if(clock && !clock.finished && !window.confirm('수업을 종료하고 준비 화면으로 돌아갈까요?'))return;try{saveSession(null);snapshot.current=null}catch{setStorageError('수업 종료 기록을 저장하지 못했습니다.')}exitPresent();setClock(null);setQueue([])}
+  function end(){if(clock && !clock.finished && !window.confirm('수업을 종료하고 준비 화면으로 돌아갈까요?'))return;if(!logLesson(clock?.finished?'complete':'ended'))return;try{saveSession(null);snapshot.current=null}catch{setStorageError('수업 종료 기록을 저장하지 못했습니다.')}meta.current=null;exitPresent();setClock(null);setQueue([])}
   if(clock && active)return <main ref={stage} className={'player '+(presentation?'presentation ':'')+'bg-'+background}>
-    <header className="player-top"><Brand/><span className="counter">{clock.index+1} / {queue.length}</span><button onClick={presentation?exitPresent:present}>{presentation?'발표 종료':'발표 화면'}</button><button onClick={end}>수업 종료</button></header>
-    <section className="visual"><div className="photo-area">{imageError?<div className="image-error">이미지를 표시할 수 없습니다. 다음 사진으로 이동해 주세요.</div>:<img className="reference" src={active.url} alt={active.name} onError={()=>setImageError(true)}/>}</div>
+    <header className="player-top"><Brand/><span className="counter">{meta.current?.group} · {clock.index+1} / {queue.length}</span><button onClick={presentation?exitPresent:present}>{presentation?'발표 종료':'발표 화면'}</button><button onClick={end}>수업 종료</button></header>
+    <section className="visual"><div className="photo-area">{active.isBreak?<div className="break-screen"><h1>휴식 시간</h1><p>잠시 쉬어 가세요.</p></div>:imageError?<div className="image-error">이미지를 표시할 수 없습니다. 다음 사진으로 이동해 주세요.</div>:<img className="reference" src={active.url} alt={active.name} onError={()=>setImageError(true)}/>}</div>
       {showTimer&&<aside className={'clock '+(!clock.finished&&remaining<=30000?'urgent':'')}><span>{clock.finished?'수업 완료':clock.deadline===null?'일시정지':remaining<=5000?'곧 전환됩니다':'남은 시간'}</span><strong data-testid="timer">{formatTime(remaining)}</strong><div className="progress"><i style={{width:Math.min(100,remaining/Math.max(clock.duration,remaining)*100)+'%'}}/></div>{!clock.finished&&remaining<=30000&&remaining>5000&&<small>30초 이내 다음 사진</small>}</aside>}
-      {clock.finished&&<div className="finished"><h2>수업이 완료되었습니다.</h2><p>{queue.length}장의 이미지 재생을 마쳤습니다.</p><button className="primary" onClick={end}>준비 화면으로</button><button onClick={()=>{const t=Date.now();setNow(t);setClock(start(queue.length,clock.duration,t));prevIndex.current=-1}}>다시 시작</button></div>}
+      {clock.finished&&<div className="finished"><h2>수업이 완료되었습니다.</h2><p>{queue.filter(p=>!p.isBreak).length}장의 이미지로 구성된 수업을 마쳤습니다.</p><button className="primary" onClick={end}>준비 화면으로</button><button onClick={repeatLesson}>다시 시작</button></div>}
     </section>
-    <footer className="controls"><div className="filename">{active.name} · {wakeStatus}{active.reference&&<> · <Credits item={active.reference}/></>}{storageError?' · '+storageError:''}</div><div className="control-row"><button disabled={clock.index===0} onClick={()=>command((c,t)=>move(c,-1,t))}>이전</button><button className="primary" disabled={clock.finished} onClick={()=>command(toggle)}>{clock.deadline===null?'재생':'일시정지'}</button><button disabled={clock.finished} onClick={()=>command((c,t)=>move(c,1,t))}>다음</button><button onClick={()=>command(restart)}>다시 시작</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,30000,t))}>+30초</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,60000,t))}>+1분</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,300000,t))}>+5분</button><button onClick={()=>setShowTimer(v=>!v)}>{showTimer?'시간 숨기기':'시간 표시'}</button></div></footer>
+    <footer className="controls"><div className="filename">{active.name} · {wakeStatus}{active.reference&&<> · <Credits item={active.reference}/></>}{storageError?' · '+storageError:''}</div><div className="control-row"><button disabled={clock.finished||clock.index===0} onClick={()=>command((c,t)=>move(c,-1,t))}>이전</button><button className="primary" disabled={clock.finished} onClick={()=>command(toggle)}>{clock.deadline===null?'재생':'일시정지'}</button><button disabled={clock.finished} onClick={()=>command((c,t)=>move(c,1,t))}>다음</button><button disabled={clock.finished} onClick={()=>command(restart)}>다시 시작</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,30000,t))}>+30초</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,60000,t))}>+1분</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,300000,t))}>+5분</button><button onClick={()=>setShowTimer(v=>!v)}>{showTimer?'시간 숨기기':'시간 표시'}</button></div></footer>
   </main>
-  return <main className="shell"><header className="top"><Brand/><span className="version">ART 2B · v0.5</span></header>
+  return <main className="shell"><header className="top"><Brand/><span className="version">ART 2D · v0.6</span></header>
     <section className="intro"><div className="eyebrow">SAI COMPANY / DRAWING STUDIO</div><h1>그림을 바라보는 시간.</h1><p>사진을 선택하고 시간을 정하면 자동으로 다음 그림으로 넘어갑니다.</p></section>
     <section className="status-strip" aria-label="앱 상태">
       <span data-testid="offline-status">{pwa.ready?'오프라인 사용 준비 완료':pwa.error||'오프라인 준비 전 · 배포 버전에서 사용'}</span><span>{pwa.online?'온라인':'오프라인'}</span><span>{loaded?storageStatus:storageError?'저장소 오류':'사진 불러오는 중…'}</span>
@@ -174,6 +204,7 @@ export default function App() {
     {recovery&&<section className="recovery" role="region" aria-label="이전 수업 복구"><div><strong>이전 수업을 이어서 진행할까요?</strong><p>{recovery.clock.index+1} / {recovery.ids.length}장 · 남은 시간 {formatTime(recovery.clock.remaining)} · 일시정지 상태로 복구</p></div><button className="primary" onClick={resumeRecovery}>이전 수업 복구</button><button onClick={discardRecovery}>기록 삭제하고 새 수업</button></section>}
     <section className="status-strip" aria-label="저장 공간"><strong>사진 저장 공간 {mb(totalBytes)}</strong><span>개인 사진 {mb(photos.filter(p=>!p.reference).reduce((n,p)=>n+p.bytes,0))} · 제공 자료 {mb(photos.filter(p=>p.reference).reduce((n,p)=>n+p.bytes,0))}</span>{quota.quota!==undefined&&quota.usage!==undefined&&<span>브라우저 추정 사용량 {mb(quota.usage)} / {mb(quota.quota)}</span>}{downloadProgress&&<span role="status">{downloadProgress}</span>}</section>
     <Library downloaded={downloaded} onDownload={receive} busy={busy} disabled={!loaded||!!recovery} online={pwa.online}/>
+    <LessonPanel data={lessons} save={saveLesson} pool={candidates} disabled={busy||!loaded||!!recovery} onStart={beginProgram}/>
     <div className="setup-grid"><section className="panel"><div className="section-head"><h2>01. 수업 이미지</h2><span>{eligible.length} / {photos.length}장</span></div>
       <div className="catalog-filters"><label>수업 자료<select aria-label="재생 자료 범위" value={source} onChange={e=>{setSource(e.target.value);setTopic('전체')}}>{['전체','제공 자료','내 사진'].map(s=><option key={s}>{s}</option>)}</select></label><label>주제<select aria-label="재생 주제" disabled={source==='내 사진'} value={topic} onChange={e=>setTopic(e.target.value)}>{['전체',...categories].map(c=><option key={c}>{c}</option>)}</select></label></div>
       <label className="import-zone"><strong>{busy?'이미지 확인 중…':'사진 여러 장 가져오기'}</strong><small>JPG, PNG, WebP 등 · 사진은 서버로 전송되지 않습니다.</small><input aria-label="사진 가져오기" type="file" accept="image/*" multiple disabled={busy||!loaded||!!recovery} onChange={e=>{void importPhotos(e.target.files);e.target.value=''}}/></label>
