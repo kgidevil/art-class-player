@@ -1,0 +1,23 @@
+import {test,expect} from '@playwright/test'
+const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jW1sAAAAASUVORK5CYII=','base64')
+test('imports, pause, extend, resume, next, finish',async({page})=>{
+ await page.goto('./');await expect(page.getByRole('button',{name:'수업 시작'})).toBeDisabled()
+ await page.getByLabel('사진 가져오기').setInputFiles([{name:'first.png',mimeType:'image/png',buffer:png},{name:'second.png',mimeType:'image/png',buffer:png}])
+ await expect(page.getByText('2장 추가')).toBeVisible()
+ await page.getByRole('button',{name:'5분',exact:true}).click();await page.getByRole('button',{name:'수업 시작'}).click()
+ await expect(page.getByRole('img',{name:'first.png'})).toBeVisible()
+ await page.getByRole('button',{name:'일시정지'}).click()
+ const before=await page.getByTestId('timer').innerText()
+ await page.waitForTimeout(1200);await expect(page.getByTestId('timer')).toHaveText(before)
+ await page.getByRole('button',{name:'+1분',exact:true}).click();await expect(page.getByTestId('timer')).toHaveText(/0[56]:/)
+ await page.getByRole('button',{name:'재생',exact:true}).click();await page.getByRole('button',{name:'다음',exact:true}).click()
+ await expect(page.getByRole('img',{name:'second.png'})).toBeVisible();await page.getByRole('button',{name:'다음',exact:true}).click()
+ await expect(page.getByText('수업이 완료되었습니다.')).toBeVisible()
+ await page.getByRole('button',{name:'준비 화면으로'}).click();await expect(page.getByText('01. 수업 이미지')).toBeVisible()
+})
+test('automatic transition and no cropping at tablet viewport',async({page})=>{
+ await page.setViewportSize({width:1194,height:834});await page.goto('./')
+ await page.getByLabel('사진 가져오기').setInputFiles([{name:'one.png',mimeType:'image/png',buffer:png},{name:'two.png',mimeType:'image/png',buffer:png}])
+ await expect(page.getByText('2장 추가')).toBeVisible();await page.getByLabel('직접 입력 (분)').fill('0.1');await page.getByRole('button',{name:'수업 시작'}).click()
+ await expect(page.getByRole('img',{name:'one.png'})).toHaveCSS('object-fit','contain');await expect(page.getByRole('img',{name:'two.png'})).toBeVisible({timeout:9000})
+})

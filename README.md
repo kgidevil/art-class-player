@@ -1,40 +1,29 @@
-# ART CLASS PLAYER
+# ART CLASS PLAYER — SAI COMPANY
 
-아이패드 기반 오프라인 우선 미술교육 이미지 플레이어 (개발 중)
+아이패드 중심 미술교육 전용 이미지 플레이어. ART 1A (v0.2) 개발 중 검증.
 
-> ART 0A: React + TypeScript + Vite 초기 구조 및 기술 검토. 아직 수업에 사용할 수 있는 플레이어 기능은 구현되지 않았습니다.
+## 사용 방법
+사진 여러 장을 가져오고 30초~20분 프리셋 또는 직접 입력을 선택하여 수업을 시작합니다. 순차/무작위, 자동 전환, 시간 연장, 일시정지, 이전/다음, 원본 비율 유지, 발표 화면을 지원합니다. 사진은 서버에 전송하지 않고 메모리에 보관합니다.
 
-## 목표
-
-청운면·단월면 미술반의 크로키·인물화·정물화 수업에서 사진을 일정한 간격으로 자동 넘기고, 강사가 일시정지·시간 연장·건너뛰기를 할 수 있는 수업용 도구입니다. iPad를 빔프로젝터에 연결하여 사용할 수 있도록 설계합니다.
-
-## 실행
-
-Node.js 22 권장:
-
-```bash
+## Windows 개발 및 테스트
+Node.js 22:
+```powershell
 npm install
 npm run dev
 npm run build
+npm test
+npx playwright install chromium
+npm run test:e2e
 ```
+GitHub Actions에서 Linux 빌드 및 타이머 단위 테스트와 Windows Chromium 브라우저 테스트를 실행합니다.
 
-로컬 개발 주소는 Vite 터미널에 표시됩니다.
+## 범위
+- ART 1A: 기본 플레이어 및 SAI 브랜드 UI.
+- 이미지 원본 저장, 오프라인 PWA, 앱 재시작 복구: ART 1B 이후.
+- 발표는 미러링용 화면으로 독립 외부 디스플레이가 아닙니다.
+- 탭이 숨겨지면 일시정지합니다. 실제 iPad 화면 잠금/외부 출력은 최종 실기기 검증 대상입니다.
+- 사용자 사진은 공개 저장소에 등록하지 않습니다.
+- 로고 경로: public/sai-logo.jpg (없을 때 SAI 글자 표시).
+- GitHub Pages는 아직 활성화 확인 전입니다.
 
-## 기술 및 배포
-
-- React, TypeScript, Vite
-- GitHub Pages 배포 대상 경로: `/art-class-player/` (아직 배포 설정 전)
-- 추후 PWA와 IndexedDB를 단계적으로 도입
-- 사용자 이미지와 수업 기록은 GitHub에 올리지 않음
-- iPad Safari, 홈 화면 앱 및 외부 출력은 실제 기기 검증 필요
-
-## 문서
-
-- [개발 규칙](AGENTS.md)
-- [개발 로드맵과 기술 위험](ROADMAP.md)
-
-## 현재 상태
-
-- ART 0A 초기 스캐폴드 완료
-- 자동 빌드 검증: GitHub Actions 결과 확인 필요
-- ART 1A (사진 가져오기, 시간 지정, 자동 전환)는 다음 개발 단계
+[개발 규칙](AGENTS.md) · [로드맵](ROADMAP.md)
