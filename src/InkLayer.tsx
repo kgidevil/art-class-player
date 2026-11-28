@@ -6,10 +6,13 @@ export default function InkLayer({width,height,flipX,flipY,settings,actions,comm
  const canvas=useRef<HTMLCanvasElement>(null)
  const draft=useRef<{pointer:number;stroke:Stroke}|null>(null)
  const [drawing,setDrawing]=useState(false)
+ const frame=useRef<number|null>(null)
  const scale=Math.min(1,1600/Math.max(1,width,height))
  const w=Math.max(1,Math.round(width*scale)),h=Math.max(1,Math.round(height*scale))
  function redraw(){const ctx=canvas.current?.getContext('2d');if(!ctx)return;renderInk(ctx,actions,w,h);if(draft.current)paintStroke(ctx,draft.current.stroke,w,h)}
+ function schedule(){if(frame.current!==null)return;frame.current=requestAnimationFrame(()=>{frame.current=null;redraw()})}
  useEffect(()=>{redraw()},[actions,w,h])
+ useEffect(()=>()=>{if(frame.current!==null)cancelAnimationFrame(frame.current)},[])
  useEffect(()=>{if(settings.tool==='move'||!settings.visible){draft.current=null;setDrawing(false);redraw()}},[settings.tool,settings.visible])
  function point(e:PointerEvent,el:HTMLCanvasElement){return normalizePoint(e.clientX,e.clientY,el.getBoundingClientRect(),flipX,flipY,e.pressure,e.pointerType==='pen')}
  function down(e:ReactPointerEvent<HTMLCanvasElement>){
@@ -28,11 +31,11 @@ export default function InkLayer({width,height,flipX,flipY,settings,actions,comm
    const next=point(p,e.currentTarget),last=d.stroke.points.at(-1)!
    if(Math.hypot(next.x-last.x,next.y-last.y)>.001)d.stroke.points.push(next)
   }
-  redraw()
+  schedule()
  }
  function finish(e:ReactPointerEvent<HTMLCanvasElement>,save:boolean){
   const d=draft.current;if(!d||d.pointer!==e.pointerId)return
-  e.stopPropagation();e.preventDefault();draft.current=null;setDrawing(false)
+  e.stopPropagation();e.preventDefault();if(frame.current!==null){cancelAnimationFrame(frame.current);frame.current=null}draft.current=null;setDrawing(false)
   if(save)commit(d.stroke);else redraw()
  }
  return <canvas ref={canvas} width={w} height={h} data-testid="ink-layer" data-drawing={drawing} aria-label="사진 위 드로잉 영역" className={'ink-layer'+(settings.tool!=='move'&&settings.visible?' ink-active':'')} style={{visibility:settings.visible?'visible':'hidden'}} onPointerDown={down} onPointerMove={move} onPointerUp={e=>finish(e,true)} onPointerCancel={e=>finish(e,false)} onLostPointerCapture={e=>finish(e,false)}/>

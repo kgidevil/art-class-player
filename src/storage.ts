@@ -10,8 +10,8 @@ const SETTINGS='sai.settings.v1'
 const SESSION='sai.session.v1'
 export function openPhotos():Promise<IDBDatabase>{
   return new Promise((resolve,reject)=>{
-    const req=indexedDB.open(DB,1)
-    req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(STORE))req.result.createObjectStore(STORE,{keyPath:'id'})}
+    const req=indexedDB.open(DB,2)
+    req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(STORE))req.result.createObjectStore(STORE,{keyPath:'id'});if(!req.result.objectStoreNames.contains('restore'))req.result.createObjectStore('restore')}
     req.onsuccess=()=>{req.result.onversionchange=()=>req.result.close();resolve(req.result)}
     req.onerror=()=>reject(req.error)
     req.onblocked=()=>reject(new Error('다른 창에서 저장소를 사용 중입니다.'))
@@ -44,9 +44,9 @@ export function readSettings():Partial<Settings>{
   }catch{return {}}
 }
 export function saveSettings(s:Settings){localStorage.setItem(SETTINGS,JSON.stringify(s))}
-export function readSession():SavedSession|null{
+export function parseSession(value:unknown):SavedSession|null{
   try{
-    const v=JSON.parse(localStorage.getItem(SESSION)??'null') as SavedSession|null
+    const v=value as SavedSession|null
     if(!v||!Array.isArray(v.ids)||!v.ids.length||!v.ids.every(Number.isSafeInteger)||new Set(v.ids).size!==v.ids.length)return null
     const c=v.clock
     if(!c||c.finished||c.count!==v.ids.length||!Number.isInteger(c.index)||c.index<0||c.index>=c.count||!Number.isFinite(c.duration)||c.duration<=0||!Number.isFinite(c.remaining)||c.remaining<0)return null
@@ -56,4 +56,27 @@ export function readSession():SavedSession|null{
     return {...v,clock:{...c,deadline:null}}
   }catch{return null}
 }
+export function readSession():SavedSession|null{try{return parseSession(JSON.parse(localStorage.getItem(SESSION)??'null'))}catch{return null}}
 export function saveSession(s:SavedSession|null){if(s)localStorage.setItem(SESSION,JSON.stringify(s));else localStorage.removeItem(SESSION)}
+
+export const BACKUP_KEYS=['sai.settings.v1','sai.session.v1','sai.lessons.v1','sai.catalog.v1','sai.catalog.auto.v1','sai.catalog.favorites.v1'] as const
+export type BackupState=Record<string,string|null>
+export function captureState():BackupState{return Object.fromEntries(BACKUP_KEYS.map(k=>[k,localStorage.getItem(k)]))}
+export async function replaceFromBackup(photos:StoredPhoto[],state:BackupState){
+ const db=await openPhotos()
+ try{await new Promise<void>((resolve,reject)=>{
+  const tx=db.transaction([STORE,'restore'],'readwrite')
+  tx.oncomplete=()=>resolve();tx.onabort=tx.onerror=()=>reject(tx.error??Error('복원 저장 실패'))
+  try{const s=tx.objectStore(STORE);s.clear();for(const p of photos)s.add(p);tx.objectStore('restore').put(state,'pending')}catch(e){tx.abort();reject(e)}
+ })}finally{db.close()}
+}
+export async function finishPendingRestore(){
+ const db=await openPhotos()
+ try{
+  const state=await new Promise<BackupState|undefined>((resolve,reject)=>{const tx=db.transaction('restore','readonly');const req=tx.objectStore('restore').get('pending');tx.oncomplete=()=>resolve(req.result);tx.onabort=tx.onerror=()=>reject(tx.error)})
+  if(!state)return
+  // A persisted journal is replayed before mounting the application. Only known keys are changed.
+  for(const k of BACKUP_KEYS){const v=state[k];if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,v)}
+  await new Promise<void>((resolve,reject)=>{const tx=db.transaction('restore','readwrite');tx.objectStore('restore').delete('pending');tx.oncomplete=()=>resolve();tx.onabort=tx.onerror=()=>reject(tx.error)})
+ }finally{db.close()}
+}

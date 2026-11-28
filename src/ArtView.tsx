@@ -1,4 +1,4 @@
-import {useEffect,useLayoutEffect,useRef,useState} from 'react'
+import {memo,useEffect,useLayoutEffect,useRef,useState} from 'react'
 import type {PointerEvent as ReactPointerEvent} from 'react'
 import {clamp,fitRect,needsCanvas,panLimit,processPixels} from './art-tools'
 import type {ArtSettings} from './art-tools'
@@ -7,7 +7,7 @@ import type {InkAction,InkSettings} from './ink'
 type InkProps={ink:InkSettings;actions:InkAction[];commit:(action:InkAction)=>void}
 type Point={x:number;y:number}
 const zero={x:0,y:0}
-export default function ArtView({src,name,settings,onError,ink,actions,commit}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
+function ArtView({src,name,settings,onError,ink,actions,commit}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
  return <div className={'art-view'+(settings.compare?' art-compare':'')}>
    {settings.compare&&<div className="art-pane art-original-pane"><span className="art-pane-label">원본</span><img src={src} alt={name+' 원본 비교'} draggable={false}/></div>}
    <div className="art-pane art-work-pane">{settings.compare&&<span className="art-pane-label">분석 이미지</span>}<WorkImage key={src} src={src} name={name} settings={settings} onError={onError} ink={ink} actions={actions} commit={commit}/></div>
@@ -71,3 +71,5 @@ function WorkImage({src,name,settings,onError,ink,actions,commit}:{src:string;na
   {canvasMode&&failure&&<span className="art-view-warning" role="status">분석 이미지 처리 실패 · 원본 표시</span>}
  </div>
 }
+
+export default memo(ArtView)

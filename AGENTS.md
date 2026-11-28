@@ -31,3 +31,6 @@ Maintain public/content/catalog.json as versioned content. Stable unique IDs; re
 
 ## ART 2C publication
 Use content/approved.json for visually inspected candidates only. Do not bypass live verification when publishing scheduled additions. Preserve existing IDs and entries, avoid near duplicates visually, note framing limitations, report failures and actual published count. Read docs/ART-2C.md. Do not force-push or alter unrelated app files.
+
+## Release gate
+Do not mark v1.0.0 final before actual deployment and physical iPad/Pencil/HDMI/3-hour tests. Do not clear site data to repair cache; backup first. Restore only validated backup with explicit replacement approval. Preserve original bytes, keep private backups out of GitHub.

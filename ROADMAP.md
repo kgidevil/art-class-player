@@ -17,7 +17,7 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 | ART 4A | Backup/restore, long-session QA and memory tuning | 3-hour real-class projection test |
 
 ## Product decisions
-1. **Offline-first:** The application shell is cached; photos/records stored locally after import, with explicit ZIP backup later.
+1. **Offline-first:** The application shell is cached; photos/records stored locally after import, with explicit binary .saibackup backup.
 2. **Instructor control:** Automatic slide changes may be delayed, paused or extended; the app never penalizes a learner for needing more time.
 3. **Projector:** Initial mode is iPad display mirroring. Extended two-screen output must not be claimed without native implementation and physical testing.
 4. **Class data safety:** Browser site storage may be evicted or cleared; backup/export and storage warnings are important.
@@ -61,3 +61,6 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 
 - ART 3A: user 13/13, build/Windows browser passed; Pages activation pending.
 - ART 3B: instructor preview, step progress, display-only drawing and presentation adjustments implemented; CI pending.
+
+- ART 3B: user 13/13, CI build/Windows passed; Pages blocked.
+- ART 4A: v1.0.0-rc.1 backup/restore, transfer guide, performance and UI hardening; release gates pending.
