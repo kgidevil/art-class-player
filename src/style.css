@@ -233,3 +233,47 @@ input:not([type=checkbox]):not([type=range]),select{font-size:1rem}
  .dashboard-setup .panel{padding:14px}
  .player.focus-mode .clock{width:100%}
 }
+
+
+/* ART 4C-4/5 — shared, non-overlapping contextual tool dock */
+.player .tool-dock{display:flex;flex-direction:column;align-items:stretch;gap:6px;flex:none;min-height:0;max-height:36dvh;padding:8px 10px;background:#1c1b1a;border:1px solid var(--border);border-radius:12px;overflow:auto}
+.tool-dock-main{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.tool-dock-main>.art-tool-buttons,.tool-dock-main>.ink-buttons,.tool-dock-main>.ink-colors{flex:none;max-width:100%}
+.tool-dock-actions{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-left:auto}
+.player .tool-dock button{min-height:44px;font-size:.9375rem;padding:7px 10px;line-height:1.25}
+.player .tool-dock button:disabled{opacity:.5}
+.player .tool-dock .ink-colors button{width:44px;height:44px;min-height:44px;padding:0;border-width:2px}
+.tool-dock-actions button:last-child{background:transparent;color:var(--muted)}
+.tool-dock-actions button[aria-expanded=true]{border-color:var(--orange);color:#ffbc94}
+.tool-dock-detail[hidden]{display:none!important}
+.tool-dock-detail{border-top:1px solid var(--border);padding-top:8px}
+.tool-dock-detail .art-toolbar-groups{grid-template-columns:1.2fr 1.1fr 1fr;align-items:start}
+.tool-grid-label,.ink-quick-width,.ink-quick-width label{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:.9375rem;color:var(--muted)}
+.tool-grid-label select{width:auto;min-height:44px;font-size:1rem}
+.ink-quick-width input{width:120px;min-height:28px;accent-color:var(--orange)}
+.ink-quick-width output,.ink-options output{color:#f5f2ed;min-width:2ch;font-variant-numeric:tabular-nums}
+.tool-active-note{font-size:.875rem;color:#ffbc94;border-left:1px solid var(--border);padding-left:8px}
+.tool-note{margin:7px 0 0;font-size:.875rem;line-height:1.5;color:var(--muted)}
+.tool-dock>p[role=status]{margin:0;color:#ffbc94;font-size:.875rem}
+.tool-dock .art-adjustments label{grid-template-columns:38px minmax(45px,1fr) 48px;font-size:.9375rem}
+.tool-dock .art-adjustments input,.tool-dock .ink-options input[type=range]{min-height:32px}
+.tool-dock .ink-options label{font-size:.9375rem}
+.tool-dock .ink-options .ink-pen-only{min-height:44px}
+@media(min-width:1000px) and (orientation:landscape){
+ .player .tool-dock:has(.ink-quick-width){display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+ .tool-dock:has(.ink-quick-width) .tool-dock-main{grid-column:1/-1}
+ .tool-dock:has(.ink-quick-width) .ink-quick-width{grid-column:1/-1}
+ .tool-dock:has(.ink-quick-width) .tool-dock-detail,.tool-dock:has(.ink-quick-width)>p{grid-column:1/-1}
+}
+@media(max-width:760px){
+ .player .tool-dock{max-height:38dvh;padding:6px;gap:6px}
+ .tool-dock-main{gap:6px}
+ .tool-dock-actions{margin-left:0}
+ .tool-dock-detail .art-toolbar-groups{grid-template-columns:1fr}
+ .player .tool-dock button{font-size:.875rem;padding:7px 9px}
+ .player .tool-dock .ink-colors button{width:44px;height:44px;padding:0}
+}
+@media(max-height:500px) and (orientation:landscape){
+ .player .tool-dock{max-height:42dvh;padding:5px 7px}
+ .tool-dock-main{gap:4px 8px}
+}
