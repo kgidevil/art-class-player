@@ -8,6 +8,9 @@ import Library,{Credits} from './Library'
 import {categories,downloadReference} from './catalog'
 import type {CatalogItem} from './catalog'
 import LessonPanel from './LessonPanel'
+import ArtView from './ArtView'
+import ArtToolbar from './ArtToolbar'
+import {defaultArt} from './art-tools'
 import {readLessons,writeLessons,prioritize,uid,upsertHistory} from './lesson'
 import type {Entry,Lessons,SessionMeta} from './lesson'
 
@@ -56,6 +59,8 @@ export default function App() {
   const [clock,setClock] = useState<Clock|null>(null)
   const [now,setNow] = useState(Date.now())
   const [presentation,setPresentation] = useState(false)
+  const [art,setArt]=useState(defaultArt)
+  const [artOpen,setArtOpen]=useState(false)
   const audio = useRef<AudioContext|null>(null)
   const prevIndex = useRef(-1)
   const stage = useRef<HTMLElement|null>(null)
@@ -131,7 +136,7 @@ export default function App() {
     return ()=>window.clearInterval(timer)
   },[clock?.deadline,clock?.finished])
   useEffect(()=>{const onVisibility=()=>{if(document.hidden){const t=Date.now();setNow(t);setClock(c=>c && c.deadline!==null ? toggle(c,t):c)}};document.addEventListener('visibilitychange',onVisibility);return ()=>document.removeEventListener('visibilitychange',onVisibility)},[])
-  useEffect(()=>{setImageError(false)},[active?.id])
+  useEffect(()=>{setImageError(false);setArt(a=>a.zoom===1?a:{...a,zoom:1})},[active?.id])
   useEffect(()=>{if(!clock){prevIndex.current=-1;return} const marker=clock.finished ? clock.count : clock.index
     if(prevIndex.current>=0 && marker!==prevIndex.current && sound && audio.current?.state==='running'){
       const a=audio.current;const osc=a.createOscillator();const gain=a.createGain();osc.frequency.value=660;gain.gain.setValueAtTime(.08,a.currentTime);gain.gain.exponentialRampToValueAtTime(.001,a.currentTime+.22);osc.connect(gain).connect(a.destination);osc.start();osc.stop(a.currentTime+.24)
@@ -174,7 +179,7 @@ export default function App() {
   async function clear(){if(busy||recovery||!loaded||!window.confirm('기기에 저장된 모든 수업 사진을 삭제할까요?'))return;setBusy(true);try{await clearPhotos();photos.forEach(p=>{URL.revokeObjectURL(p.url);urls.current.delete(p.url)});setPhotos([]);setNotice('모든 사진을 삭제했습니다.')}catch{setNotice('사진 삭제에 실패했습니다.')}finally{setBusy(false)}}
   function openLesson(ordered:Photo[],durations:number[],title:string){
     if(!ordered.length||busy||!loaded||recovery)return
-    const t=Date.now();meta.current={id:uid(),group:lessons.group,title,started:t,viewed:[]};logged.current=''
+    const t=Date.now();setArt(defaultArt());setArtOpen(false);meta.current={id:uid(),group:lessons.group,title,started:t,viewed:[]};logged.current=''
     setQueue(ordered);setNow(t);setClock(startSequence(durations,t));prevIndex.current=-1
     try{if(sound){audio.current??=new AudioContext();void audio.current.resume().catch(()=>{})}}catch{/* sound is optional */}
   }
@@ -182,18 +187,19 @@ export default function App() {
   function beginProgram(entries:Entry[],title:string){const byId=new Map(eligible.map(p=>[p.id,p]));const ordered=entries.map(e=>e.id<0?breakPhoto(e.id):byId.get(e.id));if(ordered.some(p=>!p)){setNotice('사진 목록이 변경되었습니다. 순서를 다시 확인해 주세요.');return}openLesson(ordered as Photo[],entries.map(e=>e.duration),title)}
   function repeatLesson(){if(!clock||!logLesson('complete'))return;const t=Date.now();meta.current={id:uid(),group:meta.current?.group??lessons.group,title:meta.current?.title??'일반 드로잉',started:t,viewed:[]};logged.current='';setNow(t);setClock(clock.durations?startSequence(clock.durations,t):start(queue.length,clock.duration,t));prevIndex.current=-1}
   function command(fn:(c:Clock,t:number)=>Clock){if(fn===toggle&&sound){try{audio.current??=new AudioContext();void audio.current.resume().catch(()=>{})}catch{/* optional */}}const t=Date.now();setNow(t);setClock(c=>c?fn(c,t):c)}
-  async function present(){setPresentation(true);try{if(stage.current?.requestFullscreen)await stage.current.requestFullscreen()}catch{/* CSS presentation remains available */}}
+  async function present(){setPresentation(true);setArtOpen(false);try{if(stage.current?.requestFullscreen)await stage.current.requestFullscreen()}catch{/* CSS presentation remains available */}}
   function exitPresent(){setPresentation(false);if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{})}
-  function end(){if(clock && !clock.finished && !window.confirm('수업을 종료하고 준비 화면으로 돌아갈까요?'))return;if(!logLesson(clock?.finished?'complete':'ended'))return;try{saveSession(null);snapshot.current=null}catch{setStorageError('수업 종료 기록을 저장하지 못했습니다.')}meta.current=null;exitPresent();setClock(null);setQueue([])}
+  function end(){if(clock && !clock.finished && !window.confirm('수업을 종료하고 준비 화면으로 돌아갈까요?'))return;if(!logLesson(clock?.finished?'complete':'ended'))return;try{saveSession(null);snapshot.current=null}catch{setStorageError('수업 종료 기록을 저장하지 못했습니다.')}meta.current=null;setArt(defaultArt());setArtOpen(false);exitPresent();setClock(null);setQueue([])}
   if(clock && active)return <main ref={stage} className={'player '+(presentation?'presentation ':'')+'bg-'+background}>
-    <header className="player-top"><Brand/><span className="counter">{meta.current?.group} · {clock.index+1} / {queue.length}</span><button onClick={presentation?exitPresent:present}>{presentation?'발표 종료':'발표 화면'}</button><button onClick={end}>수업 종료</button></header>
-    <section className="visual"><div className="photo-area">{active.isBreak?<div className="break-screen"><h1>휴식 시간</h1><p>잠시 쉬어 가세요.</p></div>:imageError?<div className="image-error">이미지를 표시할 수 없습니다. 다음 사진으로 이동해 주세요.</div>:<img className="reference" src={active.url} alt={active.name} onError={()=>setImageError(true)}/>}</div>
+    <header className="player-top"><Brand/><span className="counter">{meta.current?.group} · {clock.index+1} / {queue.length}</span><button disabled={active.isBreak||clock.finished} aria-pressed={artOpen} onClick={()=>setArtOpen(v=>!v)}>미술 도구</button><button onClick={presentation?exitPresent:present}>{presentation?'발표 종료':'발표 화면'}</button><button onClick={end}>수업 종료</button></header>
+    <section className="visual"><div className="photo-area">{active.isBreak?<div className="break-screen"><h1>휴식 시간</h1><p>잠시 쉬어 가세요.</p></div>:imageError?<div className="image-error">이미지를 표시할 수 없습니다. 다음 사진으로 이동해 주세요.</div>:<ArtView src={active.url} name={active.name} settings={art} onError={()=>setImageError(true)}/>}</div>
       {showTimer&&<aside className={'clock '+(!clock.finished&&remaining<=30000?'urgent':'')}><span>{clock.finished?'수업 완료':clock.deadline===null?'일시정지':remaining<=5000?'곧 전환됩니다':'남은 시간'}</span><strong data-testid="timer">{formatTime(remaining)}</strong><div className="progress"><i style={{width:Math.min(100,remaining/Math.max(clock.duration,remaining)*100)+'%'}}/></div>{!clock.finished&&remaining<=30000&&remaining>5000&&<small>30초 이내 다음 사진</small>}</aside>}
       {clock.finished&&<div className="finished"><h2>수업이 완료되었습니다.</h2><p>{queue.filter(p=>!p.isBreak).length}장의 이미지로 구성된 수업을 마쳤습니다.</p><button className="primary" onClick={end}>준비 화면으로</button><button onClick={repeatLesson}>다시 시작</button></div>}
     </section>
+    {artOpen&&!active.isBreak&&!clock.finished&&<ArtToolbar settings={art} change={setArt} close={()=>setArtOpen(false)}/>}
     <footer className="controls"><div className="filename">{active.name} · {wakeStatus}{active.reference&&<> · <Credits item={active.reference}/></>}{storageError?' · '+storageError:''}</div><div className="control-row"><button disabled={clock.finished||clock.index===0} onClick={()=>command((c,t)=>move(c,-1,t))}>이전</button><button className="primary" disabled={clock.finished} onClick={()=>command(toggle)}>{clock.deadline===null?'재생':'일시정지'}</button><button disabled={clock.finished} onClick={()=>command((c,t)=>move(c,1,t))}>다음</button><button disabled={clock.finished} onClick={()=>command(restart)}>다시 시작</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,30000,t))}>+30초</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,60000,t))}>+1분</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,300000,t))}>+5분</button><button onClick={()=>setShowTimer(v=>!v)}>{showTimer?'시간 숨기기':'시간 표시'}</button></div></footer>
   </main>
-  return <main className="shell"><header className="top"><Brand/><span className="version">ART 2D-1 · v0.6.1</span></header>
+  return <main className="shell"><header className="top"><Brand/><span className="version">ART 3A · v0.7.0</span></header>
     <section className="intro"><div className="eyebrow">SAI COMPANY / DRAWING STUDIO</div><h1>그림을 바라보는 시간.</h1><p>사진을 선택하고 시간을 정하면 자동으로 다음 그림으로 넘어갑니다.</p></section>
     <section className="status-strip" aria-label="앱 상태">
       <span data-testid="offline-status">{pwa.ready?'오프라인 사용 준비 완료':pwa.error||'오프라인 준비 전 · 배포 버전에서 사용'}</span><span>{pwa.online?'온라인':'오프라인'}</span><span>{loaded?storageStatus:storageError?'저장소 오류':'사진 불러오는 중…'}</span>

@@ -45,3 +45,36 @@
 .lesson-panel .lesson-summary>div:last-child strong{color:var(--orange)}
 @media(max-width:1050px){.lesson-panel .lesson-step{grid-template-columns:minmax(130px,1fr) minmax(200px,1.6fr) minmax(80px,.6fr);align-items:start}.lesson-panel .lesson-subtotal{text-align:left}.lesson-panel .lesson-step-actions{grid-column:2/-1;align-self:end}}
 @media(max-width:640px){.lesson-panel .lesson-group-controls,.lesson-panel .lesson-preset-row{grid-template-columns:1fr}.lesson-panel .lesson-step{grid-template-columns:minmax(100px,1fr) minmax(100px,1fr);gap:10px}.lesson-panel .lesson-step-head,.lesson-panel .lesson-time{grid-column:1/-1}.lesson-panel .lesson-step-actions{grid-column:1/-1}.lesson-panel .lesson-summary{gap:6px;padding:10px}.lesson-panel .lesson-summary strong{font-size:1rem}.lesson-panel .lesson-summary small{font-size:.72rem}}
+
+/* ART 3A non-destructive image analysis */
+.art-view{display:flex;flex:1;min-width:0;min-height:0;width:100%;height:100%;gap:4px;overflow:hidden}
+.art-pane{position:relative;flex:1;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.art-original-pane{border-right:1px solid #777}
+.art-original-pane img{width:100%;height:100%;object-fit:contain;user-select:none}
+.art-pane-label{position:absolute;z-index:3;top:8px;left:8px;border-radius:5px;padding:4px 8px;background:#111d;color:#f5f2ed;font-size:.8rem;pointer-events:none}
+.art-work-viewport{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;width:100%;height:100%;min-height:0;min-width:0}
+.art-zoomed{cursor:grab;touch-action:none}.art-zoomed:active{cursor:grabbing}
+.art-image-frame{position:relative;flex:none;transform-origin:center;user-select:none}
+.art-image-layer{position:absolute;inset:0;transform-origin:center}
+.art-image-layer .reference{position:absolute;inset:0;user-select:none;pointer-events:none}
+.art-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.art-grid{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.art-grid i{position:absolute;background:rgba(255,255,255,.88);box-shadow:0 0 1px 1px rgba(0,0,0,.65)}
+.art-grid-v{top:0;bottom:0;width:1px}.art-grid-h{left:0;right:0;height:1px}
+.art-view-warning{position:absolute;bottom:5px;left:5px;padding:6px;background:#111d;color:#ffb789;font-size:.8rem}
+.art-toolbar{flex:none;max-height:31dvh;overflow:auto;border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:10px;overscroll-behavior:contain}
+.art-toolbar-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.art-toolbar-head strong{color:var(--orange)}.art-toolbar-head span{color:var(--muted);font-size:.8rem;flex:1;min-width:130px}
+.art-toolbar button{min-height:40px;padding:7px 10px;font-size:.82rem}
+.art-toolbar button[aria-pressed=true],.player-top button[aria-pressed=true]{color:#111010;background:var(--orange);border-color:var(--orange)}
+.art-toolbar-groups{display:grid;grid-template-columns:1.4fr 1.2fr 1.2fr .8fr;gap:12px}
+.art-tool-group{min-width:0;display:flex;flex-direction:column;gap:7px}
+.art-tool-group>span{color:var(--muted);font-size:.8rem}
+.art-tool-buttons{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.art-tool-buttons label{display:flex;align-items:center;gap:5px;font-size:.8rem}
+.art-tool-buttons select{width:auto;min-height:40px}
+.art-adjustments label{display:grid;grid-template-columns:32px minmax(45px,1fr) 44px;align-items:center;gap:5px;font-size:.8rem}
+.art-adjustments input{width:100%;min-width:0;accent-color:var(--orange)}.art-adjustments output{font-variant-numeric:tabular-nums;text-align:right}
+@media(max-width:1000px){.art-toolbar-groups{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.art-toolbar{max-height:32dvh}.art-toolbar-groups{grid-template-columns:1fr}.art-toolbar button{min-height:44px}.art-pane-label{font-size:.68rem}}
+@media(max-height:500px){.art-toolbar{max-height:31dvh}.art-toolbar-head{margin-bottom:6px}.art-toolbar button{min-height:32px;padding:4px 8px}}

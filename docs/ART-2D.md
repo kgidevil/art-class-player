@@ -8,3 +8,6 @@
 
 ## ART 2D-1 user-reported usability fix
 Run 45969346645: build and Windows browser jobs passed, Pages configure failed. User reported class-add disabled and requested minutes and more intuitive UI. Code inspection confirmed shared busy/loading/recovery guard disabled class creation and preset saving even though independent localStorage edits do not need photo transactions. Exact runtime state in screenshot unconfirmed. Split configuration controls from playback start guard; show explicit feedback, duplicate normalized whitespace detection, minute entry/presets (internal seconds remain unchanged), labeled responsive cards, subtotal and overall summary, preserve old saved presets. New browser regression simulates blocked auto-download while saving class and preset. CI/user validation pending.
+
+## ART 2D-1 CI result
+Run 46094023712: build and Windows browser jobs passed, including group/preset editing during blocked automatic download. Pages configure failed. User manual retest was not reported before proceeding to ART 3A.

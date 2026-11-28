@@ -55,3 +55,6 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 - ART 2D: variable lesson programs, breaks, reusable presets, class profiles, usage history and unused-first selection implemented; CI pending.
 
 - ART 2D: build/browser CI passed; user requested minute entry, class-add fix and clearer editor. ART 2D-1 v0.6.1 implements split guards and UI; regression pending.
+
+- ART 2D-1: build and Windows browser CI passed; manual retest not reported.
+- ART 3A: display-only art analysis, grids, flips, zoom/pan, compare implemented; CI pending.
