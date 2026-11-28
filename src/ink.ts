@@ -15,6 +15,21 @@ export function appendInk(actions:InkAction[],action:InkAction):InkAction[]{
  return [...actions,action]
 }
 export function undoInk(actions:InkAction[]){return actions.slice(0,-1)}
+export type InkHistory={past:InkAction[];future:InkAction[]}
+export const emptyInkHistory=():InkHistory=>({past:[],future:[]})
+export function commitInkHistory(h:InkHistory,action:InkAction):InkHistory{
+ const past=action.kind==='clear'?[...h.past.slice(-(MAX_ACTIONS-1)),action]:appendInk(h.past,action)
+ return past===h.past?h:{past,future:[]}
+}
+export function undoInkHistory(h:InkHistory):InkHistory{
+ if(!h.past.length)return h
+ return {past:h.past.slice(0,-1),future:[...h.future,h.past.at(-1)!]}
+}
+export function redoInkHistory(h:InkHistory):InkHistory{
+ if(!h.future.length||h.past.length>=MAX_ACTIONS)return h
+ return {past:[...h.past,h.future.at(-1)!],future:h.future.slice(0,-1)}
+}
+
 export function renderInk(ctx:CanvasRenderingContext2D,actions:InkAction[],w:number,h:number){
  ctx.clearRect(0,0,w,h)
  for(const action of actions){
