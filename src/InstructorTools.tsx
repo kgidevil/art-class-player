@@ -25,7 +25,7 @@ export function InkToolbar({settings,change,actions,undo,redo,canRedo,clear,demo
    <div className="ink-options"><label>투명도<input aria-label="펜 불투명도" type="range" min={15} max={100} step={5} value={settings.opacity} onChange={e=>set({opacity:Number(e.target.value)})}/><output>{settings.opacity}%</output></label><label className="ink-pen-only"><input type="checkbox" checked={settings.penOnly} onChange={e=>set({penOnly:e.target.checked})}/> 펜 입력만</label><button aria-pressed={!settings.visible} onClick={()=>set({visible:!settings.visible})}>{settings.visible?'설명선 숨기기':'설명선 표시'}</button><button disabled={!actions.length} onClick={clear}>선 전체 지우기</button></div>
    <label className="ink-pressure-toggle"><input type="checkbox" checked={settings.pressureEnabled} onChange={e=>set({pressureEnabled:e.target.checked})}/> 펜 필압 반영</label>
    <div className="ink-pressure-report" role="status" aria-label="필압 진단">{!sample?'필압 진단 · 펜으로 가볍게 시작해 점차 힘을 주며 한 획을 그려 보세요.':sample.pointerType!=='pen'?'필압 진단 · 마지막 획은 펜 입력으로 인식되지 않았습니다.':low===null||high===null?'필압 진단 · 측정값 없음':'필압 진단 · 펜 인식 · 최저 '+low.toFixed(3)+' / 최고 '+high.toFixed(3)+' · '+(high-low>=.05?'변화 감지':'변화 미미 · 힘을 달리하여 다시 확인')}</div>
-   <p className="tool-note">그림 위 두 손가락 탭: 실행 취소 · 세 손가락 탭: 다시 실행. 두 손가락으로 벌리거나 오므리면 확대·축소, 함께 움직이면 이동합니다. 시연을 누르면 하단 도구가 숨겨지고 계속 그릴 수 있습니다. 펜을 화면에서 뗀 뒤 제스처를 사용하세요. 설명선은 사진별로 유지되며 원본은 변경되지 않습니다.</p>
+   <p className="tool-note">그림 위 두 손가락 탭: 실행 취소 · 세 손가락 탭: 다시 실행. 두 손가락으로 벌리거나 오므리면 확대·축소, 함께 움직이면 이동합니다. 시연을 누르면 모든 메뉴와 타이머가 숨겨지고, 시연 종료만 표시됩니다. 계속 그릴 수 있습니다. 펜을 화면에서 뗀 뒤 제스처를 사용하세요. 설명선은 사진별로 유지되며 원본은 변경되지 않습니다.</p>
   </div>
   {actions.length>=MAX_ACTIONS&&<p role="status">설명선 기록 한도에 도달했습니다. 실행 취소하거나 상세 설정에서 전체 지우기를 사용하세요.</p>}
  </section>
