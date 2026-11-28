@@ -6,6 +6,10 @@ const colorNames=['주황','노랑','빨강','하늘','초록','흰색','검정'
 export function InkToolbar({settings,change,actions,undo,clear,close}:{settings:InkSettings;change:(s:InkSettings)=>void;actions:InkAction[];undo:()=>void;clear:()=>void;close:()=>void}){
  const [advanced,setAdvanced]=useState(false)
  const set=(p:Partial<InkSettings>)=>change({...settings,...p})
+ const last=actions.at(-1)
+ const sample=last?.kind==='stroke'?last:null
+ const pressures=sample?.pointerType==='pen'?sample.points.map(p=>p.pressure):[]
+ const low=pressures.length?Math.min(...pressures):null,high=pressures.length?Math.max(...pressures):null
  return <section className="ink-toolbar tool-dock" aria-label="드로잉 도구">
   <div className="tool-dock-main">
    <div className="ink-buttons" role="group" aria-label="기본 드로잉">
@@ -19,6 +23,8 @@ export function InkToolbar({settings,change,actions,undo,clear,close}:{settings:
   <div id="ink-advanced" className="tool-dock-detail" hidden={!advanced}>
    <div className="ink-quick-width"><label>굵기<input aria-label="펜 굵기" type="range" min={2} max={30} value={settings.width} onChange={e=>set({width:Number(e.target.value)})}/><output>{settings.width}</output></label></div>
    <div className="ink-options"><label>투명도<input aria-label="펜 불투명도" type="range" min={15} max={100} step={5} value={settings.opacity} onChange={e=>set({opacity:Number(e.target.value)})}/><output>{settings.opacity}%</output></label><label className="ink-pen-only"><input type="checkbox" checked={settings.penOnly} onChange={e=>set({penOnly:e.target.checked})}/> 펜 입력만</label><button aria-pressed={!settings.visible} onClick={()=>set({visible:!settings.visible})}>{settings.visible?'설명선 숨기기':'설명선 표시'}</button><button disabled={!actions.length} onClick={clear}>선 전체 지우기</button></div>
+   <label className="ink-pressure-toggle"><input type="checkbox" checked={settings.pressureEnabled} onChange={e=>set({pressureEnabled:e.target.checked})}/> 펜 필압 반영</label>
+   <div className="ink-pressure-report" role="status" aria-label="필압 진단">{!sample?'필압 진단 · 펜으로 가볍게 시작해 점차 힘을 주며 한 획을 그려 보세요.':sample.pointerType!=='pen'?'필압 진단 · 마지막 획은 펜 입력으로 인식되지 않았습니다.':low===null||high===null?'필압 진단 · 측정값 없음':'필압 진단 · 펜 인식 · 최저 '+low.toFixed(3)+' / 최고 '+high.toFixed(3)+' · '+(high-low>=.05?'변화 감지':'변화 미미 · 힘을 달리하여 다시 확인')}</div>
    <p className="tool-note">설명선은 현재 수업 동안 사진별로 유지됩니다. 원본 사진은 변경되지 않습니다.</p>
   </div>
   {actions.length>=MAX_ACTIONS&&<p role="status">설명선 기록 한도에 도달했습니다. 실행 취소하거나 상세 설정에서 전체 지우기를 사용하세요.</p>}
