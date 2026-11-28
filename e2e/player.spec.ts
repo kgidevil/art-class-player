@@ -714,6 +714,14 @@ test('ART 5F compact tool strips keep photo size and expose independent popovers
  for(const size of [{width:1194,height:834},{width:834,height:1194},{width:800,height:560}]){
   await page.setViewportSize(size)
   await expect(frame).toBeVisible()
+  // ResizeObserver updates fitted image dimensions asynchronously after rotation.
+  // Compare against the current viewport's expected fit, not the previous layout.
+  await expect.poll(async()=>{
+   const v=(await page.getByTestId('art-viewport').boundingBox())!
+   const r=(await frame.boundingBox())!
+   const scale=Math.min(v.width/64,v.height/96)
+   return Math.max(Math.abs(r.width-64*scale),Math.abs(r.height-96*scale),Math.abs(r.x-(v.x+(v.width-r.width)/2)),Math.abs(r.y-(v.y+(v.height-r.height)/2)))
+  }).toBeLessThanOrEqual(1)
   const before=(await frame.boundingBox())!
   await page.getByRole('button',{name:'드로잉',exact:true}).click()
   const strip=(await dock.boundingBox())!
@@ -734,7 +742,7 @@ test('ART 5F compact tool strips keep photo size and expose independent popovers
   await page.getByRole('button',{name:'상세 설정',exact:true}).click()
   await expect(page.getByLabel('펜 굵기')).toBeVisible()
   const r=(await frame.boundingBox())!
-  await page.mouse.click(r.x+r.width*.5,r.y+r.height*.2)
+  await page.mouse.click(r.x+r.width*.025,r.y+r.height*.25)
   await expect(page.locator('.slim-popup:visible')).toHaveCount(0)
   expect(await frame.boundingBox()).toEqual(before)
   await page.getByRole('button',{name:'미술 도구',exact:true}).click()
