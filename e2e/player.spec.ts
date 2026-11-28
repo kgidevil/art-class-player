@@ -459,3 +459,32 @@ test('ART 5A compact iPad viewport keeps quick start and slide count accessible'
  await page.getByRole('button',{name:'다음',exact:true}).click()
  await expect(index).toHaveText('2 / 2')
 })
+
+
+test('ART 5B pen pressure changes rendered thickness and reports sampled range',async({page})=>{
+ await page.setViewportSize({width:1194,height:834});await page.goto('./')
+ const photo=await sharp({create:{width:600,height:800,channels:3,background:'#888'}}).png().toBuffer()
+ await page.getByLabel('사진 가져오기').setInputFiles({name:'pressure.png',mimeType:'image/png',buffer:photo})
+ await expect(page.getByText('1장 추가')).toBeVisible()
+ await page.getByRole('button',{name:'수업 시작'}).click()
+ await page.getByRole('button',{name:'일시정지'}).click()
+ await page.getByRole('button',{name:'드로잉',exact:true}).click()
+ await page.getByRole('button',{name:'상세 설정',exact:true}).click()
+ const layer=page.getByTestId('ink-layer')
+ await expect(layer).toBeVisible()
+ const box=(await layer.boundingBox())!
+ const stroke=async(id:number,y:number,pressures:number[])=>{
+  const send=async(type:string,x:number,p:number,buttons:number)=>layer.dispatchEvent(type,{pointerId:id,pointerType:'pen',isPrimary:true,button:type==='pointermove'?-1:0,buttons,clientX:box.x+box.width*x,clientY:box.y+box.height*y,pressure:p})
+  await send('pointerdown',.15,pressures[0],1)
+  for(let i=0;i<pressures.length;i++)await send('pointermove',.2+i*.6/Math.max(1,pressures.length-1),pressures[i],1)
+  await send('pointerup',.8,0,0)
+ }
+ await stroke(21,.3,[.1,.1,.1,.9,.9,.9])
+ await expect(page.getByLabel('필압 진단')).toContainText('최저 0.100 / 최고 0.900')
+ const count=(x:number,y:number)=>layer.evaluate((el:HTMLCanvasElement,xy)=>{const ctx=el.getContext('2d')!;let n=0;const cx=Math.round(el.width*xy.x),cy=Math.round(el.height*xy.y);for(let j=-15;j<=15;j++)if(ctx.getImageData(cx,cy+j,1,1).data[3]>100)n++;return n},{x,y})
+ await expect.poll(async()=>await count(.7,.3)).toBeGreaterThan(await count(.3,.3)+2)
+ await page.getByLabel('펜 필압 반영').uncheck()
+ await stroke(22,.65,[.1,.1,.1,.9,.9,.9])
+ await expect(page.getByLabel('필압 진단')).toContainText('변화 감지')
+ expect(Math.abs(await count(.7,.65)-await count(.3,.65))).toBeLessThanOrEqual(1)
+})
