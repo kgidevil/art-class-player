@@ -19,17 +19,17 @@ export default function InkLayer({width,height,flipX,flipY,settings,actions,comm
   if(settings.tool==='move'||!settings.visible||draft.current||actions.length>=MAX_ACTIONS||e.button!==0||!e.isPrimary||(settings.penOnly&&e.pointerType!=='pen'))return
   e.stopPropagation();e.preventDefault()
   try{e.currentTarget.setPointerCapture(e.pointerId)}catch{/* synthetic events and older browsers */}
-  draft.current={pointer:e.pointerId,stroke:{kind:'stroke',tool:settings.tool,color:settings.color,width:settings.width,opacity:settings.opacity,points:[point(e.nativeEvent,e.currentTarget)]}}
+  draft.current={pointer:e.pointerId,stroke:{kind:'stroke',tool:settings.tool,color:settings.color,width:settings.width,opacity:settings.opacity,pointerType:e.pointerType,pressureEnabled:settings.pressureEnabled,points:[point(e.nativeEvent,e.currentTarget)]}}
   setDrawing(true);redraw()
  }
  function move(e:ReactPointerEvent<HTMLCanvasElement>){
   const d=draft.current;if(!d||d.pointer!==e.pointerId)return
   e.stopPropagation();e.preventDefault()
-  const native=e.nativeEvent;const events=native.getCoalescedEvents?.()??[]
+  const native=e.nativeEvent;let events:PointerEvent[]=[];try{events=native.getCoalescedEvents?.()??[]}catch{/* browser fallback */}
   for(const p of events.length?events:[native]){
    if(d.stroke.points.length>=MAX_POINTS)break
    const next=point(p,e.currentTarget),last=d.stroke.points.at(-1)!
-   if(Math.hypot(next.x-last.x,next.y-last.y)>.001)d.stroke.points.push(next)
+   if(Math.hypot(next.x-last.x,next.y-last.y)>.001||Math.abs(next.pressure-last.pressure)>.015)d.stroke.points.push(next)
   }
   schedule()
  }
