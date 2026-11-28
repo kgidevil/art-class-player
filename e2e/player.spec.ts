@@ -414,3 +414,23 @@ test('ART 4C responsive tool docks disclose advanced settings without changing d
  await expect(page.getByRole('img',{name:'dock.svg 원본 비교'})).toBeVisible()
  await expect(page.getByTestId('timer')).toHaveText(time)
 })
+
+
+test('ART 4C compact transport keeps extra commands reachable and preserves paused time',async({page})=>{
+ await page.setViewportSize({width:1194,height:834});await page.goto('./')
+ await expect(page.getByRole('link',{name:/오프라인 준비/})).toBeVisible()
+ await page.getByLabel('사진 가져오기').setInputFiles({name:'transport.svg',mimeType:'image/svg+xml',buffer:png})
+ await expect(page.getByText('1장 추가')).toBeVisible()
+ await page.getByRole('button',{name:'5분',exact:true}).click()
+ await page.getByRole('button',{name:'수업 시작'}).click()
+ await page.getByRole('button',{name:'일시정지'}).click()
+ await expect(page.getByRole('button',{name:'+30초',exact:true})).toBeHidden()
+ await page.getByRole('button',{name:'더 보기',exact:true}).click()
+ await page.getByRole('button',{name:'+5분',exact:true}).click()
+ await expect(page.getByTestId('timer')).toHaveText(/^(09:5[0-9]|10:00)$/)
+ await page.getByRole('button',{name:'다시 시작',exact:true}).click()
+ await expect(page.getByTestId('timer')).toHaveText('05:00')
+ await page.getByRole('button',{name:'접기',exact:true}).click()
+ await expect(page.getByRole('button',{name:'+5분',exact:true})).toBeHidden()
+ await expect(page.getByRole('button',{name:'+1분',exact:true})).toBeVisible()
+})
