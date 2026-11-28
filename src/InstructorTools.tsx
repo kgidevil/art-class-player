@@ -15,8 +15,9 @@ export function InkToolbar({settings,change,actions,undo,clear,close}:{settings:
    <div className="ink-colors" role="group" aria-label="펜 색상">{colors.map((c,i)=><button key={c} title={colorNames[i]} aria-label={'펜 색상 '+colorNames[i]} aria-pressed={settings.color===c} style={{'--ink-color':c} as React.CSSProperties} onClick={()=>set({color:c,tool:'pen',visible:true})}/>)}</div>
    <div className="tool-dock-actions"><button aria-expanded={advanced} aria-controls="ink-advanced" onClick={()=>setAdvanced(v=>!v)}>{advanced?'상세 접기':'상세 설정'}</button><button onClick={close} aria-label="드로잉 도구 접기">닫기</button></div>
   </div>
-  <div className="ink-quick-width"><label>굵기<input aria-label="펜 굵기" type="range" min={2} max={30} value={settings.width} onChange={e=>set({width:Number(e.target.value)})}/><output>{settings.width}</output></label>{settings.penOnly&&<span className="tool-active-note">펜 전용</span>}{!settings.visible&&<span className="tool-active-note">설명선 숨김</span>}</div>
+  {(settings.penOnly||!settings.visible)&&<div className="ink-status">{settings.penOnly&&<span className="tool-active-note">펜 전용</span>}{!settings.visible&&<span className="tool-active-note">설명선 숨김</span>}</div>}
   <div id="ink-advanced" className="tool-dock-detail" hidden={!advanced}>
+   <div className="ink-quick-width"><label>굵기<input aria-label="펜 굵기" type="range" min={2} max={30} value={settings.width} onChange={e=>set({width:Number(e.target.value)})}/><output>{settings.width}</output></label></div>
    <div className="ink-options"><label>투명도<input aria-label="펜 불투명도" type="range" min={15} max={100} step={5} value={settings.opacity} onChange={e=>set({opacity:Number(e.target.value)})}/><output>{settings.opacity}%</output></label><label className="ink-pen-only"><input type="checkbox" checked={settings.penOnly} onChange={e=>set({penOnly:e.target.checked})}/> 펜 입력만</label><button aria-pressed={!settings.visible} onClick={()=>set({visible:!settings.visible})}>{settings.visible?'설명선 숨기기':'설명선 표시'}</button><button disabled={!actions.length} onClick={clear}>선 전체 지우기</button></div>
    <p className="tool-note">설명선은 현재 수업 동안 사진별로 유지됩니다. 원본 사진은 변경되지 않습니다.</p>
   </div>
