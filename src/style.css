@@ -387,3 +387,5 @@ input:not([type=checkbox]):not([type=range]),select{font-size:1rem}
  .image-first .clock,.image-first.focus-mode .clock{top:calc(var(--stage-top) + 48px);padding:5px 8px}
  .image-first .stage-bottom>.tool-dock{max-height:33dvh}
 }
+
+.image-first.demo-drawing .stage-bottom{display:none}
