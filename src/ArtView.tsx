@@ -4,16 +4,16 @@ import {clamp,fitRect,needsCanvas,panLimit,processPixels} from './art-tools'
 import type {ArtSettings} from './art-tools'
 import InkLayer from './InkLayer'
 import type {InkAction,InkSettings} from './ink'
-type InkProps={ink:InkSettings;actions:InkAction[];commit:(action:InkAction)=>void}
+type InkProps={ink:InkSettings;actions:InkAction[];commit:(action:InkAction)=>void;undo:()=>void;redo:()=>void;changeZoom:(zoom:number)=>void}
 type Point={x:number;y:number}
 const zero={x:0,y:0}
-function ArtView({src,name,settings,onError,ink,actions,commit}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
+function ArtView({src,name,settings,onError,ink,actions,commit,undo,redo,changeZoom}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
  return <div className={'art-view'+(settings.compare?' art-compare':'')}>
    {settings.compare&&<div className="art-pane art-original-pane"><span className="art-pane-label">원본</span><img src={src} alt={name+' 원본 비교'} draggable={false}/></div>}
-   <div className="art-pane art-work-pane">{settings.compare&&<span className="art-pane-label">분석 이미지</span>}<WorkImage key={src} src={src} name={name} settings={settings} onError={onError} ink={ink} actions={actions} commit={commit}/></div>
+   <div className="art-pane art-work-pane">{settings.compare&&<span className="art-pane-label">분석 이미지</span>}<WorkImage key={src} src={src} name={name} settings={settings} onError={onError} ink={ink} actions={actions} commit={commit} undo={undo} redo={redo} changeZoom={changeZoom}/></div>
  </div>
 }
-function WorkImage({src,name,settings,onError,ink,actions,commit}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
+function WorkImage({src,name,settings,onError,ink,actions,commit,undo,redo,changeZoom}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
  const view=useRef<HTMLDivElement>(null),img=useRef<HTMLImageElement>(null),canvas=useRef<HTMLCanvasElement>(null)
  const [size,setSize]=useState({width:0,height:0})
  const [natural,setNatural]=useState({width:0,height:0})
@@ -28,6 +28,16 @@ function WorkImage({src,name,settings,onError,ink,actions,commit}:{src:string;na
  const fit=fitRect(size.width,size.height,natural.width,natural.height)
  const maxX=panLimit(size.width,fit.width,zoom),maxY=panLimit(size.height,fit.height,zoom)
  const safePan={x:clamp(pan.x,-maxX,maxX),y:clamp(pan.y,-maxY,maxY)}
+ const transform=useRef({zoom,pan:safePan})
+ useLayoutEffect(()=>{transform.current={zoom,pan:safePan}},[zoom,safePan.x,safePan.y])
+ function pinch(scale:number,from:Point,to:Point){
+  const rect=view.current?.getBoundingClientRect();if(!rect||!Number.isFinite(scale))return
+  const old=transform.current,next=clamp(old.zoom*scale,1,3),ratio=next/old.zoom
+  const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2
+  const x=clamp(to.x-cx-(from.x-cx-old.pan.x)*ratio,-panLimit(size.width,fit.width,next),panLimit(size.width,fit.width,next))
+  const y=clamp(to.y-cy-(from.y-cy-old.pan.y)*ratio,-panLimit(size.height,fit.height,next),panLimit(size.height,fit.height,next))
+  transform.current={zoom:next,pan:{x,y}};setPan({x,y});changeZoom(next)
+ }
  useLayoutEffect(()=>{
   const el=view.current;if(!el)return
   const measure=()=>{const r=el.getBoundingClientRect();setSize({width:r.width,height:r.height})}
@@ -64,7 +74,7 @@ function WorkImage({src,name,settings,onError,ink,actions,commit}:{src:string;na
    <div className="art-image-layer" style={{transform:'scale('+ (flipX?-1:1)+','+(flipY?-1:1)+')'}}>
     <img ref={img} className="reference" src={src} alt={name} draggable={false} onLoad={e=>{const el=e.currentTarget;setNatural({width:el.naturalWidth,height:el.naturalHeight})}} onError={onError} style={{filter,visibility:ready?'hidden':'visible'}}/>
     {canvasMode&&<canvas ref={canvas} className="art-canvas" role="img" aria-label={name+' 분석 이미지'} data-testid="art-canvas" style={{visibility:ready?'visible':'hidden'}}/>}
-    {natural.width>0&&<InkLayer width={natural.width} height={natural.height} flipX={flipX} flipY={flipY} settings={ink} actions={actions} commit={commit}/>}
+    {natural.width>0&&<InkLayer width={natural.width} height={natural.height} flipX={flipX} flipY={flipY} settings={ink} actions={actions} commit={commit} undo={undo} redo={redo} pinch={pinch}/>}
    </div>
    {grid>0&&<div className="art-grid" data-testid="art-grid" aria-hidden="true">{Array.from({length:grid-1},(_,i)=><i key={'v'+i} className="art-grid-v" style={{left:((i+1)*100/grid)+'%'}}/>)}{Array.from({length:grid-1},(_,i)=><i key={'h'+i} className="art-grid-h" style={{top:((i+1)*100/grid)+'%'}}/>)}</div>}
   </div>
