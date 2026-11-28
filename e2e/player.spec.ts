@@ -728,7 +728,7 @@ test('ART 5F compact tool strips keep photo size and expose independent popovers
   await page.getByRole('button',{name:'펜 색상 빨강'}).click()
   await expect(page.locator('.slim-popup:visible')).toHaveCount(0)
   await page.getByRole('button',{name:'사진 불투명도 설정'}).click()
-  await expect(page.getByLabel('사진 불투명도')).toBeInViewport()
+  await expect(page.getByRole('slider',{name:'사진 불투명도',exact:true})).toBeInViewport()
   await page.keyboard.press('Escape')
   await expect(page.locator('.slim-popup:visible')).toHaveCount(0)
   await page.getByRole('button',{name:'상세 설정',exact:true}).click()
