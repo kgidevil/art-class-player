@@ -342,3 +342,6 @@ input:not([type=checkbox]):not([type=range]),select{font-size:1rem}
  .dashboard-summary>label{grid-column:1/-1}
  .player-top .counter{flex:1 1 115px}
 }
+
+/* ART 5B: pressure diagnostics are visible only in advanced drawing tools. */
+.ink-pressure-toggle{display:flex;align-items:center;gap:8px;min-height:44px;font-size:.9375rem;color:#f5f2ed}.ink-pressure-toggle input{width:20px;height:20px;accent-color:var(--orange);flex:none}.ink-pressure-report{font-size:.875rem;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.5;overflow-wrap:anywhere}
