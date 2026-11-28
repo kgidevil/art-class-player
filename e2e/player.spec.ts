@@ -318,3 +318,25 @@ test('backup transfers original photos, settings and class preset to fresh conte
   expect(restored).toEqual(Array.from(photo))
  }finally{await context.close()}
 })
+
+
+test('ART 4C compact tablet player keeps image and touch controls visible',async({page})=>{
+ await page.setViewportSize({width:1194,height:834});await page.goto('./')
+ await page.getByLabel('사진 가져오기').setInputFiles({name:'tablet.svg',mimeType:'image/svg+xml',buffer:png})
+ await expect(page.getByText('1장 추가')).toBeVisible()
+ await page.getByRole('button',{name:'수업 시작'}).click()
+ await page.getByRole('button',{name:'일시정지'}).click()
+ await page.getByRole('button',{name:'드로잉',exact:true}).click()
+ for(const size of [{width:1194,height:834},{width:1024,height:768}]){
+  await page.setViewportSize(size)
+  const photo=page.locator('.photo-area')
+  await expect.poll(async()=> (await photo.boundingBox())?.height??0).toBeGreaterThan(size.height*.5)
+  await expect(page.getByRole('img',{name:'tablet.svg'})).toHaveCSS('object-fit','contain')
+  for(const name of ['펜','지우개','재생','다음','드로잉 도구 접기']){
+   const b=page.getByRole('button',{name,exact:true})
+   await expect(b).toBeInViewport()
+   expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+  }
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true)
+ }
+})
