@@ -25,11 +25,20 @@ const breakPhoto=(id:number):Photo=>({id,name:'휴식 시간',url:'',bytes:0,isB
 const presets = [30,60,120,180,300,600,900,1200]
 const durationLabel = (s: number) => s < 60 ? s + '초' : s/60 + '분'
 const logo = import.meta.env.BASE_URL + 'sai-logo.jpg'
+type DashboardPage='home'|'materials'|'time'|'lessons'|'settings'
+const totalLabel=(seconds:number)=>{const n=Math.round(seconds);return n>=3600?Math.floor(n/3600)+'시간 '+Math.floor(n%3600/60)+'분':formatTime(n*1000)}
+const dashboardPages:{id:DashboardPage;label:string}[]=[{id:'home',label:'홈'},{id:'materials',label:'자료'},{id:'time',label:'시간'},{id:'lessons',label:'수업'},{id:'settings',label:'설정'}]
+function DashIcon({name}:{name:DashboardPage|'play'|'check'|'back'}){
+ const paths={home:'M3 10 12 3l9 7v11h-6v-7H9v7H3z',materials:'M4 5h16v14H4z M4 16l5-5 4 4 3-3 4 4 M15 9h.01',time:'M12 7v5l3 2 M9 2h6 M12 4a9 9 0 1 0 0 18 9 9 0 1 0 0-18',lessons:'M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M2 21v-2a6 6 0 0 1 12 0v2 M16 5a4 4 0 1 0 0 7 M17 15a5 5 0 0 1 5 5v1',settings:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M12 2v3 M12 19v3 M2 12h3 M19 12h3 M5 5l2 2 M17 17l2 2 M5 19l2-2 M17 7l2-2 M12 5a7 7 0 1 0 0 14 7 7 0 0 0 0-14',play:'M8 4l12 8-12 8z',check:'M5 12l4 4L19 6',back:'M15 5l-7 7 7 7'} as const
+ return <svg className="dash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]}/></svg>
+}
 function Brand() {
   const [failed,setFailed] = useState(false)
   return <div className="brand">{failed ? <span className="brand-fallback">SAI</span> : <img src={logo} alt="사이컴퍼니 SAI 로고" onError={()=>setFailed(true)}/>}<div><strong>ART CLASS PLAYER</strong><small>SAI COMPANY · ART EDUCATION</small></div></div>
 }
 export default function App() {
+  const [dashboard,setDashboard]=useState<DashboardPage>('home')
+  const navigateDashboard=(page:DashboardPage)=>{setDashboard(page);window.scrollTo(0,0)}
   const [photos,setPhotos] = useState<Photo[]>([])
   const [lessons,setLessons]=useState(readLessons)
   const lessonRef=useRef(lessons)
@@ -219,7 +228,7 @@ export default function App() {
   function command(fn:(c:Clock,t:number)=>Clock){if(fn===toggle&&sound){try{audio.current??=new AudioContext();void audio.current.resume().catch(()=>{})}catch{/* optional */}}const t=Date.now();setNow(t);setClock(c=>c?fn(c,t):c)}
   async function present(){setDemoDrawing(false);setTransportMore(false);setPresentation(true);setArtOpen(false);setInkOpen(false);setInk(a=>({...a,tool:'move'}));try{if(stage.current?.requestFullscreen)await stage.current.requestFullscreen()}catch{/* CSS presentation remains available */}}
   function exitPresent(){setPresentation(false);if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{})}
-  function end(){if(clock && !clock.finished && !window.confirm('수업을 종료하고 준비 화면으로 돌아갈까요?'))return;if(!logLesson(clock?.finished?'complete':'ended'))return;try{saveSession(null);snapshot.current=null}catch{setStorageError('수업 종료 기록을 저장하지 못했습니다.')}meta.current=null;setArt(defaultArt());setArtOpen(false);resetInstructor();exitPresent();setClock(null);setQueue([])}
+  function end(){if(clock && !clock.finished && !window.confirm('수업을 종료하고 준비 화면으로 돌아갈까요?'))return;if(!logLesson(clock?.finished?'complete':'ended'))return;try{saveSession(null);snapshot.current=null}catch{setStorageError('수업 종료 기록을 저장하지 못했습니다.')}meta.current=null;setArt(defaultArt());setArtOpen(false);resetInstructor();exitPresent();setClock(null);setQueue([]);navigateDashboard('home')}
   if(clock && active)return <main ref={stage} className={'player image-first '+(presentation?'presentation ':'')+(presentation&&!clock.finished?'focus-mode ':'')+(demoActive?'demo-drawing ':'')+(drawingPhotoOpacity<100?'drawing-paper ':'')+'bg-'+background}>
     <header className="player-top"><Brand/><span className="counter"><span className="counter-group" title={meta.current?.group}>{meta.current?.group}</span><span className="counter-index">{clock.index+1} / {queue.length}</span></span><button disabled={active.isBreak||clock.finished} aria-pressed={artOpen} onClick={()=>{setDemoDrawing(false);setArtOpen(v=>!v);setInkOpen(false);setInk(a=>({...a,tool:'move'}))}}>미술 도구</button><button disabled={active.isBreak||clock.finished} aria-pressed={inkOpen} onClick={()=>{setDemoDrawing(false);setArtOpen(false);setInkOpen(v=>!v);setInk(a=>({...a,tool:inkOpen?'move':'pen',visible:true}))}}>드로잉</button><button disabled={clock.finished} aria-pressed={instructor&&!presentation} onClick={()=>setInstructor(v=>!v)} className="instructor-toggle">강사 모드</button>{art.zoom>1&&<button onClick={()=>setArt(a=>({...a,zoom:1}))}>화면 맞춤</button>}<button className="present-toggle" onClick={presentation?exitPresent:present}>{presentation?'발표 종료':'발표 화면'}</button><button onClick={end}>수업 종료</button></header>
     <section className="visual"><div className="photo-area">{active.isBreak?<div className="break-screen"><h1>휴식 시간</h1><p>잠시 쉬어 가세요.</p></div>:imageError?<div className="image-error">이미지를 표시할 수 없습니다. 다음 사진으로 이동해 주세요.</div>:<ArtView src={active.url} name={active.name} settings={art} onError={onImageError} ink={ink} actions={actions} commit={commitInk} undo={undoDrawing} redo={redoDrawing} changeZoom={zoom=>setArt(a=>({...a,zoom}))} photoOpacity={drawingPhotoOpacity}/>}</div>
@@ -235,29 +244,41 @@ export default function App() {
     <footer className="controls"><div className="filename">{active.name} · {wakeStatus}{active.reference&&<> · <Credits item={active.reference}/></>}{storageError?' · '+storageError:''}</div><div className="control-row"><button disabled={clock.finished||clock.index===0} onClick={()=>command((c,t)=>move(c,-1,t))}>이전</button><button className="primary" disabled={clock.finished} onClick={()=>command(toggle)}>{clock.deadline===null?'재생':'일시정지'}</button><button disabled={clock.finished} onClick={()=>command((c,t)=>move(c,1,t))}>다음</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,60000,t))}>+1분</button><button onClick={()=>setShowTimer(v=>!v)}>{showTimer?'시간 숨기기':'시간 표시'}</button><button aria-expanded={transportMore} aria-controls="transport-extra" onClick={()=>setTransportMore(v=>!v)}>{transportMore?'접기':'더 보기'}</button></div><div id="transport-extra" className="transport-extra" hidden={!transportMore}><button disabled={clock.finished} onClick={()=>command(restart)}>다시 시작</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,30000,t))}>+30초</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,300000,t))}>+5분</button></div></footer>
     </div>
   </main>
-  return <main className="shell"><header className="top"><Brand/><span className="version">ART 5D-2 · v1.0.0 RC1</span></header>
-    <nav className="dashboard-nav" aria-label="주요 메뉴"><a href="#today">오늘의 수업</a><a href="#materials">미술자료</a><a href="#lessons">수업 관리</a><a href="#settings">설정</a></nav>
-    <section className="intro" id="today"><div className="dashboard-intro-line"><div className="eyebrow">SAI / DRAWING STUDIO</div><a className="dashboard-ready" href="#settings">{pwa.ready?'오프라인 준비 완료':'오프라인 준비 확인'}</a></div><h1>오늘의 수업</h1><div className="dashboard-summary"><label>오늘의 강의실<select aria-label="오늘의 강의실" value={lessons.group} onChange={e=>saveLesson({...lessons,group:e.target.value})}>{lessons.groups.map(g=><option key={g}>{g}</option>)}</select></label><div><span>재생할 사진</span><strong>{eligible.length}장</strong></div><div><span>사진당 시간</span><strong>{valid?formatTime(effective*1000):'--:--'}</strong></div></div></section>
+  return <main className="shell compact-shell">
+    <header className="top compact-header"><Brand/><button className="compact-offline" onClick={()=>navigateDashboard('settings')} aria-label="오프라인 상태 및 설정"><DashIcon name={pwa.ready?'check':'settings'}/><span>{pwa.ready?'오프라인 준비':'준비 확인'}</span></button></header>
+    {dashboard!=='home'&&<div className="compact-page-heading"><button type="button" onClick={()=>navigateDashboard('home')} aria-label="홈으로"><DashIcon name="back"/></button><h1>{dashboardPages.find(p=>p.id===dashboard)?.label}</h1></div>}
     {storageError&&<p role="alert" className="warning">{storageError}</p>}
+    {busy&&dashboard!=='home'&&<p className="compact-operation" role="status">{downloadProgress||'저장 작업 중…'}</p>}
+    {notice&&dashboard!=='materials'&&<p className="compact-operation" role="status">{notice}</p>}
     {recovery&&<section className="recovery" role="region" aria-label="이전 수업 복구"><div><strong>이전 수업을 이어서 진행할까요?</strong><p>{recovery.clock.index+1} / {recovery.ids.length}장 · 남은 시간 {formatTime(recovery.clock.remaining)} · 일시정지 상태로 복구</p></div><button className="primary" onClick={resumeRecovery}>이전 수업 복구</button><button onClick={discardRecovery}>기록 삭제하고 새 수업</button></section>}
-    {pwa.update&&<section className="dashboard-update" role="status">새 버전이 준비되었습니다. <a href="#settings">설정에서 적용</a></section>}
-    <section className="quick-start" aria-label="수업 시작 요약"><div className="quick-start-total"><span>예상 수업 시간</span><strong>{valid?formatTime(eligible.length*effective*1000):'--:--'}</strong></div><button className="primary start" disabled={!eligible.length||!valid||busy||backupBusy||!loaded||!!recovery} onClick={begin}>수업 시작</button></section>
-    <div className="setup-grid dashboard-setup"><section className="panel"><div className="section-head"><h2>01. 수업 이미지</h2><span>{eligible.length} / {photos.length}장</span></div>
+    {pwa.update&&<section className="dashboard-update" role="status">새 버전이 준비되었습니다. <button onClick={()=>navigateDashboard('settings')}>설정에서 적용</button></section>}
+    <section className="compact-home" id="today" hidden={dashboard!=='home'} aria-label="오늘의 수업">
+      <label className="compact-class"><span>강의실</span><select aria-label="오늘의 강의실" value={lessons.group} onChange={e=>saveLesson({...lessons,group:e.target.value})}>{lessons.groups.map(g=><option key={g}>{g}</option>)}</select></label>
+      <div className="compact-summary">
+        <button type="button" className="compact-stat" onClick={()=>navigateDashboard('materials')} aria-label="사진 자료 설정"><DashIcon name="materials"/><strong>{eligible.length}<small>장</small></strong><span>사진</span></button>
+        <button type="button" className="compact-stat" onClick={()=>navigateDashboard('time')} aria-label="사진당 시간 설정"><DashIcon name="time"/><strong>{valid?formatTime(effective*1000):'--:--'}</strong><span>사진당 시간</span></button>
+        <div className="compact-stat"><DashIcon name="time"/><strong>{valid?totalLabel(eligible.length*effective):'--:--'}</strong><span>전체 시간</span></div>
+      </div>
+      <button className="primary start compact-start" disabled={!eligible.length||!valid||busy||backupBusy||!loaded||!!recovery} onClick={begin}><DashIcon name="play"/>수업 시작</button>
+      {!loaded?<p className="compact-hint">사진 불러오는 중…</p>:busy||backupBusy?<p className="compact-hint">저장 작업 중…</p>:!eligible.length?<button className="compact-hint compact-link" onClick={()=>navigateDashboard('materials')}>자료에서 사진 추가</button>:!valid?<button className="compact-hint compact-link" onClick={()=>navigateDashboard('time')}>시간 설정 확인</button>:null}
+      {downloadProgress&&<p className="compact-hint" role="status">{downloadProgress}</p>}
+    </section>
+    <section id="materials" className="compact-page dashboard-section" hidden={dashboard!=='materials'}><section className="panel"><div className="section-head"><h2>내 수업 이미지</h2><span>{eligible.length} / {photos.length}장</span></div>
       <div className="catalog-filters"><label>수업 자료<select aria-label="재생 자료 범위" value={source} onChange={e=>{setSource(e.target.value);setTopic('전체')}}>{['전체','제공 자료','내 사진'].map(s=><option key={s}>{s}</option>)}</select></label><label>주제<select aria-label="재생 주제" disabled={source==='내 사진'} value={topic} onChange={e=>setTopic(e.target.value)}>{['전체',...categories].map(c=><option key={c}>{c}</option>)}</select></label></div>
       <label className="import-zone"><strong>{busy?'이미지 확인 중…':'사진 여러 장 가져오기'}</strong><small>JPG, PNG, WebP 등 · 사진은 서버로 전송되지 않습니다.</small><input aria-label="사진 가져오기" type="file" accept="image/*" multiple disabled={busy||backupBusy||!loaded||!!recovery} onChange={e=>{void importPhotos(e.target.files);e.target.value=''}}/></label>
-      <p role="status" className="notice">{notice}</p>
+      <p role="status" className="notice">{dashboard==='materials'?notice:''}</p>
       {photos.length>0&&<><div className="thumbs">{eligible.slice(0,thumbLimit).map((p,i)=><article key={p.id}><img src={p.url} alt={p.name} loading="lazy" decoding="async"/><div><small>{i+1}. {p.name}{p.reference?' · SAI':''}</small><button aria-label={p.name+' 삭제'} disabled={busy||backupBusy||!!recovery} onClick={()=>void remove(p.id)}>삭제</button></div></article>)}</div>{eligible.length>thumbLimit&&<button onClick={()=>setThumbLimit(n=>n+60)}>사진 60장 더 보기 ({thumbLimit} / {eligible.length}장)</button>}<button onClick={()=>void clear()} disabled={busy||backupBusy||!!recovery}>전체 삭제</button></>}
-    </section><section className="panel"><div className="section-head"><h2>02. 수업 시간</h2></div><p className="muted">사진 한 장당 시간</p><div className="presets">{presets.map(s=><button key={s} aria-pressed={custom===''&&seconds===s} className={custom===''&&seconds===s?'selected':''} onClick={()=>{setSeconds(s);setCustom('')}}>{durationLabel(s)}</button>)}</div>
-    <label className="custom">직접 입력 (분)<input type="number" min={.1} max={120} step="any" placeholder="예: 7.5" value={custom} onChange={e=>setCustom(e.target.value)}/></label>{!valid&&<p role="alert">5초 이상 120분 이하로 설정해 주세요.</p>}
-    <div className="options"><label><input type="checkbox" checked={random} onChange={e=>setRandom(e.target.checked)}/> 무작위 순서</label><label><input type="checkbox" checked={sound} onChange={e=>setSound(e.target.checked)}/> 전환 알림음</label><label><input type="checkbox" checked={showTimer} onChange={e=>setShowTimer(e.target.checked)}/> 남은 시간 표시</label><label>발표 배경<select value={background} onChange={e=>setBackground(e.target.value)}><option value="black">검정</option><option value="gray">회색</option><option value="white">흰색</option></select></label></div>
-    </section></div>
-    <section id="materials" className="dashboard-section"><h2 className="dashboard-section-title">미술자료</h2>
+    </section>
     <Library downloaded={downloaded} onDownload={receive} busy={busy} disabled={!loaded||!!recovery||backupBusy} online={pwa.online}/>
     </section>
-    <section id="lessons" className="dashboard-section"><h2 className="dashboard-section-title">수업 관리</h2>
+    <section id="time" className="compact-page dashboard-section" hidden={dashboard!=='time'}><section className="panel"><div className="section-head"><h2>사진당 시간</h2></div><div className="compact-time-value" aria-label="설정된 사진당 시간">{valid?formatTime(effective*1000):'--:--'}</div><div className="presets">{presets.map(s=><button key={s} aria-pressed={custom===''&&seconds===s} className={custom===''&&seconds===s?'selected':''} onClick={()=>{setSeconds(s);setCustom('')}}>{durationLabel(s)}</button>)}</div>
+    <label className="custom">직접 입력 (분)<input type="number" min={.1} max={120} step="any" placeholder="예: 7.5" value={custom} onChange={e=>setCustom(e.target.value)}/></label>{!valid&&<p role="alert">5초 이상 120분 이하로 설정해 주세요.</p>}
+    <button className="primary" disabled={!valid} onClick={()=>navigateDashboard('home')}>시간 적용</button></section></section>
+    <section id="lessons" className="compact-page dashboard-section" hidden={dashboard!=='lessons'}>
     <LessonPanel data={lessons} save={saveLesson} pool={candidates} startBlocked={!loaded?'사진 저장소를 불러오는 중입니다.':recovery?'이전 수업을 복구하거나 기록을 삭제한 뒤 새 수업을 시작할 수 있습니다.':busy||backupBusy?'사진 저장 작업이 끝나면 수업을 시작할 수 있습니다.':''} onStart={beginProgram}/>
     </section>
-    <section id="settings" className="dashboard-section"><h2 className="dashboard-section-title">설정 및 백업</h2>
+    <section id="settings" className="compact-page dashboard-section" hidden={dashboard!=='settings'}><section className="panel"><h2>재생 설정</h2>    <div className="options"><label><input type="checkbox" checked={random} onChange={e=>setRandom(e.target.checked)}/> 무작위 순서</label><label><input type="checkbox" checked={sound} onChange={e=>setSound(e.target.checked)}/> 전환 알림음</label><label><input type="checkbox" checked={showTimer} onChange={e=>setShowTimer(e.target.checked)}/> 남은 시간 표시</label><label>발표 배경<select value={background} onChange={e=>setBackground(e.target.value)}><option value="black">검정</option><option value="gray">회색</option><option value="white">흰색</option></select></label></div>
+</section><span className="version">ART 5E · v1.0.0 RC1</span>
     <section className="status-strip" aria-label="앱 상태">
       <span data-testid="offline-status">{pwa.ready?'오프라인 사용 준비 완료':pwa.error||'오프라인 준비 전 · 배포 버전에서 사용'}</span><span>{pwa.online?'온라인':'오프라인'}</span><span>{loaded?storageStatus:storageError?'저장소 오류':'사진 불러오는 중…'}</span>
       <button disabled={!loaded||busy} onClick={()=>void requestStorage()}>저장 유지 요청</button>
@@ -266,6 +287,7 @@ export default function App() {
     <section className="status-strip" aria-label="저장 공간"><strong>사진 저장 공간 {mb(totalBytes)}</strong><span>개인 사진 {mb(photos.filter(p=>!p.reference).reduce((n,p)=>n+p.bytes,0))} · 제공 자료 {mb(photos.filter(p=>p.reference).reduce((n,p)=>n+p.bytes,0))}</span>{quota.quota!==undefined&&quota.usage!==undefined&&<span>브라우저 추정 사용량 {mb(quota.usage)} / {mb(quota.quota)}</span>}{downloadProgress&&<span role="status">{downloadProgress}</span>}</section>
     <BackupPanel disabled={!loaded||busy} onLock={setBackupBusy} onRestore={()=>{restoring.current=true}}/>
     </section>
-    <footer className="bottom">Developed by SAI COMPANY · 사진은 이 브라우저의 기기 저장소에만 보관됩니다. 사이트 데이터 삭제 시 사라질 수 있으며 데이터 백업 및 이전에서 정기적으로 백업해 주세요. 여러 탭 동시 편집은 피해주세요.</footer>
+    <footer className="bottom" hidden={dashboard!=='settings'}>Developed by SAI COMPANY · 사진은 이 브라우저의 기기 저장소에만 보관됩니다. 사이트 데이터 삭제 시 사라질 수 있으며 데이터 백업 및 이전에서 정기적으로 백업해 주세요. 여러 탭 동시 편집은 피해주세요.</footer>
+    <nav className="compact-nav" aria-label="주요 메뉴">{dashboardPages.map(p=><button type="button" key={p.id} aria-current={dashboard===p.id?'page':undefined} onClick={()=>navigateDashboard(p.id)}><DashIcon name={p.id}/><span>{p.label}</span></button>)}</nav>
   </main>
 }

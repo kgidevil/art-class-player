@@ -17,3 +17,6 @@ Main deployment run 46154637122 completed successfully. User supplied a complete
 
 ## ART 5D-2: clean presentation
 User requests presentation (distinct from drawing demonstration) to show only remaining time and translucent presentation exit. Hide header/counter, transport, tools and progress bar; place translucent timer in upper left and exit in upper right safe areas. Existing show-timer setting is honored. Exit returns to ordinary player; Escape also works. Completion screen and normal timer/transition behavior retained. No drawing engine or photo geometry changes. Updated browser test covers one accessible button, translucent overlays, portrait safe placement, restored time and hidden timer preference. New build/device verification pending. ART 5E dashboard redesign remains deferred.
+
+### ART 5D-2 device acceptance
+Main deployment 46155623558 succeeded (merge 6bca6dc). User reported ART 5D-2 physical iPad verification complete on 2026-11-28. No additional individual hardware test results were supplied. ART 5E dashboard work may proceed; retain release-candidate designation pending the remaining release gates.
