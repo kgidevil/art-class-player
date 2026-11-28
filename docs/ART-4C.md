@@ -31,3 +31,11 @@ Keep all ART 1A–4A functions, local photo bytes, backups, class data, catalog 
 - Shared responsive dock uses normal flow, not a floating overlay, to avoid blocking image or ink coordinates. 44 CSS px button targets and scrollable details. No icon-only controls in this implementation; Korean text labels preserved.
 - Updated existing art/drawing tests to explicitly open advanced settings; added portrait tablet 834×1194 and phone 390×844 viewport checks, disclosure state preservation, art comparison, paused timer continuity. New CI not yet confirmed.
 - Remaining: full UI polish, transport simplification if needed, actual iPad portrait/landscape and pencil/HDMI/3-hour testing, main merge and Pages deploy only after regression review.
+
+
+## Fourth pass (ART 4C-5/6)
+- Third-pass UI and updated regression run 46149998347 (0406d3a) succeeded. Intermediate partial commits may fail when old tests expect controls that have moved; the integrated test commit passed.
+- Compact transport: previous/play-pause/next/+1 minute/timer visibility always present, restart/+30 seconds/+5 minutes behind an explicit More toggle. Reset disclosure on new lesson, repeat or focus entry. No timer logic changes.
+- First screen links to offline readiness; remove misleading fixed active navigation state. Limit thumbnail gallery height; improve form target size; constrain wide timer text. Guard import, deletion and PWA update during backup/restore operations.
+- Added transport regression for hidden/revealed commands, extension and restart. Latest full CI is pending. Physical device tests (offline cold launch, Pencil, projector, 3-hour class) remain pending.
+- Release candidate only. Merge and deploy after latest PR CI succeeds. Do not clear device storage; back up before testing update. No native distribution or paid service required.
