@@ -434,3 +434,28 @@ test('ART 4C compact transport keeps extra commands reachable and preserves paus
  await expect(page.getByRole('button',{name:'+5분',exact:true})).toBeHidden()
  await expect(page.getByRole('button',{name:'+1분',exact:true})).toBeVisible()
 })
+
+
+test('ART 5A compact iPad viewport keeps quick start and slide count accessible',async({page})=>{
+ await page.setViewportSize({width:800,height:560});await page.goto('./')
+ await expect(page.getByRole('button',{name:'수업 시작',exact:true})).toBeInViewport()
+ await page.getByLabel('사진 가져오기').setInputFiles([{name:'qa-a.svg',mimeType:'image/svg+xml',buffer:png},{name:'qa-b.svg',mimeType:'image/svg+xml',buffer:png}])
+ await expect(page.getByText('2장 추가')).toBeVisible()
+ await page.getByRole('button',{name:'수업 시작',exact:true}).click()
+ await page.getByRole('button',{name:'일시정지'}).click()
+ const index=page.locator('.counter-index')
+ await expect(index).toHaveText('1 / 2')
+ await expect(index).toHaveCSS('white-space','nowrap')
+ await expect(index).toBeInViewport()
+ const before=(await page.locator('.photo-area').boundingBox())!.height
+ await page.getByRole('button',{name:'드로잉',exact:true}).click()
+ await expect(page.getByLabel('펜 굵기')).toBeHidden()
+ await expect(page.getByRole('button',{name:'드로잉 도구 접기'})).toBeInViewport()
+ expect((await page.locator('.photo-area').boundingBox())!.height).toBeGreaterThan(before*.6)
+ await page.getByRole('button',{name:'상세 설정',exact:true}).click()
+ await expect(page.getByLabel('펜 굵기')).toBeVisible()
+ await page.getByRole('button',{name:'상세 접기',exact:true}).click()
+ await expect(page.getByLabel('펜 굵기')).toBeHidden()
+ await page.getByRole('button',{name:'다음',exact:true}).click()
+ await expect(index).toHaveText('2 / 2')
+})
