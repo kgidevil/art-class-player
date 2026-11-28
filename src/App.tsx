@@ -71,6 +71,7 @@ export default function App() {
   const [focusMode,setFocusMode] = useState(false)
   const [transportMore,setTransportMore] = useState(false)
   const [demoDrawing,setDemoDrawing] = useState(false)
+  const [photoOpacity,setPhotoOpacity] = useState(100)
   const [art,setArt]=useState(defaultArt)
   const [artOpen,setArtOpen]=useState(false)
   const [ink,setInk]=useState(defaultInk)
@@ -85,6 +86,7 @@ export default function App() {
   const remaining = clock ? left(clock,now) : 0
   const active = clock ? queue[clock.index] : undefined
   const demoActive=demoDrawing&&inkOpen&&!!clock&&!clock.finished&&!!active&&!active.isBreak
+  const drawingPhotoOpacity=inkOpen&&!!clock&&!clock.finished&&!!active&&!active.isBreak?photoOpacity:100
   const nextPhoto=clock&&!clock.finished?queue[clock.index+1]:undefined
   const overall=clock?lessonProgress(clock.index,clock.count,clock.duration,remaining,clock.finished):0
   const scheduledRemaining=clock&&!clock.finished?remaining+(clock.durations?.slice(clock.index+1).reduce((a,b)=>a+b,0)??(clock.count-clock.index-1)*clock.duration):0
@@ -94,7 +96,7 @@ export default function App() {
   const undoDrawing=useCallback(()=>{if(!active||active.isBreak||clock?.finished)return;const id=active.id;setInkByPhoto(m=>({...m,[id]:undoInkHistory(m[id]??emptyInkHistory())}))},[active,clock?.finished])
   const redoDrawing=useCallback(()=>{if(!active||active.isBreak||clock?.finished)return;const id=active.id;setInkByPhoto(m=>({...m,[id]:redoInkHistory(m[id]??emptyInkHistory())}))},[active,clock?.finished])
   function clearDrawing(){commitInk({kind:'clear'})}
-  function resetInstructor(){setDemoDrawing(false);setTransportMore(false);setInk(defaultInk());setInkOpen(false);setInkByPhoto({});setInstructor(false)}
+  function resetInstructor(){setPhotoOpacity(100);setDemoDrawing(false);setTransportMore(false);setInk(defaultInk());setInkOpen(false);setInkByPhoto({});setInstructor(false)}
   const [imageError,setImageError] = useState(false)
   const onImageError=useCallback(()=>setImageError(true),[])
   const wakeStatus=useScreenWake(!!clock&&!clock.finished)
@@ -219,9 +221,9 @@ export default function App() {
   async function present(){setDemoDrawing(false);setTransportMore(false);setPresentation(true);setFocusMode(true);setArtOpen(false);setInkOpen(false);setInk(a=>({...a,tool:'move'}));try{if(stage.current?.requestFullscreen)await stage.current.requestFullscreen()}catch{/* CSS presentation remains available */}}
   function exitPresent(){setPresentation(false);setFocusMode(false);if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{})}
   function end(){if(clock && !clock.finished && !window.confirm('수업을 종료하고 준비 화면으로 돌아갈까요?'))return;if(!logLesson(clock?.finished?'complete':'ended'))return;try{saveSession(null);snapshot.current=null}catch{setStorageError('수업 종료 기록을 저장하지 못했습니다.')}meta.current=null;setArt(defaultArt());setArtOpen(false);resetInstructor();exitPresent();setClock(null);setQueue([])}
-  if(clock && active)return <main ref={stage} className={'player image-first '+(presentation?'presentation ':'')+(presentation&&focusMode&&!clock.finished?'focus-mode ':'')+(demoActive?'demo-drawing ':'')+'bg-'+background}>
+  if(clock && active)return <main ref={stage} className={'player image-first '+(presentation?'presentation ':'')+(presentation&&focusMode&&!clock.finished?'focus-mode ':'')+(demoActive?'demo-drawing ':'')+(drawingPhotoOpacity<100?'drawing-paper ':'')+'bg-'+background}>
     <header className="player-top"><Brand/><span className="counter"><span className="counter-group" title={meta.current?.group}>{meta.current?.group}</span><span className="counter-index">{clock.index+1} / {queue.length}</span></span><button disabled={active.isBreak||clock.finished} aria-pressed={artOpen} onClick={()=>{setDemoDrawing(false);setArtOpen(v=>!v);setInkOpen(false);setInk(a=>({...a,tool:'move'}))}}>미술 도구</button><button disabled={active.isBreak||clock.finished} aria-pressed={inkOpen} onClick={()=>{setDemoDrawing(false);setArtOpen(false);setInkOpen(v=>!v);setInk(a=>({...a,tool:inkOpen?'move':'pen',visible:true}))}}>드로잉</button><button disabled={clock.finished} aria-pressed={instructor&&!presentation} onClick={()=>setInstructor(v=>!v)} className="instructor-toggle">강사 모드</button>{presentation&&<button className="focus-toggle" aria-pressed={focusMode} onClick={()=>{if(!focusMode){setDemoDrawing(false);setTransportMore(false);setArtOpen(false);setInkOpen(false);setInk(a=>({...a,tool:'move'}))}setFocusMode(v=>!v)}}>{focusMode?'조작 표시':'집중 보기'}</button>}{art.zoom>1&&<button onClick={()=>setArt(a=>({...a,zoom:1}))}>화면 맞춤</button>}<button className="present-toggle" onClick={presentation?exitPresent:present}>{presentation?'발표 종료':'발표 화면'}</button><button onClick={end}>수업 종료</button></header>
-    <section className="visual"><div className="photo-area">{active.isBreak?<div className="break-screen"><h1>휴식 시간</h1><p>잠시 쉬어 가세요.</p></div>:imageError?<div className="image-error">이미지를 표시할 수 없습니다. 다음 사진으로 이동해 주세요.</div>:<ArtView src={active.url} name={active.name} settings={art} onError={onImageError} ink={ink} actions={actions} commit={commitInk} undo={undoDrawing} redo={redoDrawing} changeZoom={zoom=>setArt(a=>({...a,zoom}))}/>}</div>
+    <section className="visual"><div className="photo-area">{active.isBreak?<div className="break-screen"><h1>휴식 시간</h1><p>잠시 쉬어 가세요.</p></div>:imageError?<div className="image-error">이미지를 표시할 수 없습니다. 다음 사진으로 이동해 주세요.</div>:<ArtView src={active.url} name={active.name} settings={art} onError={onImageError} ink={ink} actions={actions} commit={commitInk} undo={undoDrawing} redo={redoDrawing} changeZoom={zoom=>setArt(a=>({...a,zoom}))} photoOpacity={drawingPhotoOpacity}/>}</div>
       {showTimer&&<aside className={'clock '+(!clock.finished&&remaining<=30000?'urgent':'')}><span>{clock.finished?'수업 완료':clock.deadline===null?'일시정지':remaining<=5000?'곧 전환됩니다':'남은 시간'}</span><strong data-testid="timer">{formatTime(remaining)}</strong><div className="progress"><i style={{width:Math.min(100,remaining/Math.max(clock.duration,remaining)*100)+'%'}}/></div>{!clock.finished&&remaining<=30000&&remaining>5000&&<small>30초 이내 다음 사진</small>}</aside>}
       {instructor&&!presentation&&!clock.finished&&<InstructorPreview next={nextPhoto} remaining={formatTime(scheduledRemaining)} percent={overall} index={clock.index+1} count={queue.length}/>}
       {clock.finished&&<div className="finished"><h2>수업이 완료되었습니다.</h2><p>{queue.filter(p=>!p.isBreak).length}장의 이미지로 구성된 수업을 마쳤습니다.</p><button className="primary" onClick={end}>준비 화면으로</button><button onClick={repeatLesson}>다시 시작</button></div>}
@@ -229,7 +231,7 @@ export default function App() {
     {demoActive&&<button type="button" className="demo-exit" onClick={()=>setDemoDrawing(false)}>시연 종료</button>}
     <div className="stage-bottom">
     {artOpen&&!active.isBreak&&!clock.finished&&<ArtToolbar settings={art} change={setArt} close={()=>setArtOpen(false)}/>}
-    {inkOpen&&!active.isBreak&&!clock.finished&&<InkToolbar settings={ink} change={setInk} actions={actions} undo={undoDrawing} redo={redoDrawing} canRedo={!!history?.future.length} clear={clearDrawing} demo={()=>setDemoDrawing(true)} close={()=>{setDemoDrawing(false);setInkOpen(false);setInk(a=>({...a,tool:'move'}))}}/>}
+    {inkOpen&&!active.isBreak&&!clock.finished&&<InkToolbar settings={ink} change={setInk} photoOpacity={photoOpacity} changePhotoOpacity={setPhotoOpacity} actions={actions} undo={undoDrawing} redo={redoDrawing} canRedo={!!history?.future.length} clear={clearDrawing} demo={()=>setDemoDrawing(true)} close={()=>{setDemoDrawing(false);setInkOpen(false);setInk(a=>({...a,tool:'move'}))}}/>}
     <footer className="controls"><div className="filename">{active.name} · {wakeStatus}{active.reference&&<> · <Credits item={active.reference}/></>}{storageError?' · '+storageError:''}</div><div className="control-row"><button disabled={clock.finished||clock.index===0} onClick={()=>command((c,t)=>move(c,-1,t))}>이전</button><button className="primary" disabled={clock.finished} onClick={()=>command(toggle)}>{clock.deadline===null?'재생':'일시정지'}</button><button disabled={clock.finished} onClick={()=>command((c,t)=>move(c,1,t))}>다음</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,60000,t))}>+1분</button><button onClick={()=>setShowTimer(v=>!v)}>{showTimer?'시간 숨기기':'시간 표시'}</button><button aria-expanded={transportMore} aria-controls="transport-extra" onClick={()=>setTransportMore(v=>!v)}>{transportMore?'접기':'더 보기'}</button></div><div id="transport-extra" className="transport-extra" hidden={!transportMore}><button disabled={clock.finished} onClick={()=>command(restart)}>다시 시작</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,30000,t))}>+30초</button><button disabled={clock.finished} onClick={()=>command((c,t)=>extend(c,300000,t))}>+5분</button></div></footer>
     </div>
   </main>
