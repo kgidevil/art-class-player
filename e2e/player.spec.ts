@@ -4,7 +4,7 @@ test.beforeEach(async({page})=>{await page.route('https://raw.githubusercontent.
 const png=Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="96"><rect width="64" height="96" fill="#999"/></svg>')
 test('imports, pause, extend, resume, next, finish',async({page})=>{
  await page.goto('./');await expect(page.getByRole('button',{name:'수업 시작'})).toBeDisabled()
- await page.getByLabel('사진 가져오기').setInputFiles([{name:'first.svg',mimeType:'image/svg+xml',buffer:png},{name:'second.svg',mimeType:'image/svg+xml',buffer:png}])
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles([{name:'first.svg',mimeType:'image/svg+xml',buffer:png},{name:'second.svg',mimeType:'image/svg+xml',buffer:png}])
  await expect(page.getByText('2장 추가')).toBeVisible()
  await page.getByRole('button',{name:'5분',exact:true}).click();await page.getByRole('button',{name:'수업 시작'}).click()
  await expect(page.getByRole('img',{name:'first.svg'})).toBeVisible()
@@ -19,14 +19,14 @@ test('imports, pause, extend, resume, next, finish',async({page})=>{
 })
 test('automatic transition and no cropping at tablet viewport',async({page})=>{
  await page.setViewportSize({width:1194,height:834});await page.goto('./')
- await page.getByLabel('사진 가져오기').setInputFiles([{name:'one.svg',mimeType:'image/svg+xml',buffer:png},{name:'two.svg',mimeType:'image/svg+xml',buffer:png}])
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles([{name:'one.svg',mimeType:'image/svg+xml',buffer:png},{name:'two.svg',mimeType:'image/svg+xml',buffer:png}])
  await expect(page.getByText('2장 추가')).toBeVisible();await page.getByLabel('직접 입력 (분)').fill('0.1');await page.getByRole('button',{name:'수업 시작'}).click()
  await expect(page.getByRole('img',{name:'one.svg'})).toHaveCSS('object-fit','contain');await expect(page.getByRole('img',{name:'two.svg'})).toBeVisible({timeout:9000})
 })
 
 test('persist images and settings, restore paused session without skipping, delete permanently',async({page})=>{
  await page.goto('./')
- await page.getByLabel('사진 가져오기').setInputFiles([{name:'stored-one.svg',mimeType:'image/svg+xml',buffer:png},{name:'stored-two.svg',mimeType:'image/svg+xml',buffer:png}])
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles([{name:'stored-one.svg',mimeType:'image/svg+xml',buffer:png},{name:'stored-two.svg',mimeType:'image/svg+xml',buffer:png}])
  await expect(page.getByText('2장 추가')).toBeVisible()
  await page.getByRole('button',{name:'10분',exact:true}).click()
  await page.reload();await expect(page.getByRole('img',{name:'stored-one.svg'})).toBeVisible()
@@ -55,7 +55,7 @@ test('persist images and settings, restore paused session without skipping, dele
 test('offline reload with service worker, persisted photos and playback',async({page,context})=>{
  await page.goto('./')
  await expect(page.getByTestId('offline-status')).toHaveText('오프라인 사용 준비 완료',{timeout:20000})
- await page.getByLabel('사진 가져오기').setInputFiles([{name:'offline.svg',mimeType:'image/svg+xml',buffer:png}])
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles([{name:'offline.svg',mimeType:'image/svg+xml',buffer:png}])
  await expect(page.getByText('1장 추가')).toBeVisible()
  const diagnostics:string[]=[]
  page.on('pageerror',e=>diagnostics.push(e.message))
@@ -115,7 +115,7 @@ test('favorites, remote catalog revision, opt-in auto download and persistence',
 
 test('lesson preset, variable timer, break recovery and separate group histories',async({page})=>{
  await page.goto('./')
- await page.getByLabel('사진 가져오기').setInputFiles([{name:'lesson-a.svg',mimeType:'image/svg+xml',buffer:png},{name:'lesson-b.svg',mimeType:'image/svg+xml',buffer:png}])
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles([{name:'lesson-a.svg',mimeType:'image/svg+xml',buffer:png},{name:'lesson-b.svg',mimeType:'image/svg+xml',buffer:png}])
  await expect(page.getByText('2장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 프로그램 만들기'}).click()
  await page.getByLabel('프로그램 이름').fill('짧은 수업')
@@ -192,7 +192,7 @@ test('class and preset edits remain available during automatic image download',a
 test('art tools are non-destructive, grid fits photo, compare and zoom reset on next',async({page})=>{
  const photo=await sharp({create:{width:120,height:180,channels:3,background:'#787878'}}).png().toBuffer()
  await page.goto('./')
- await page.getByLabel('사진 가져오기').setInputFiles([{name:'study-a.png',mimeType:'image/png',buffer:photo},{name:'study-b.png',mimeType:'image/png',buffer:photo}])
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles([{name:'study-a.png',mimeType:'image/png',buffer:photo},{name:'study-b.png',mimeType:'image/png',buffer:photo}])
  await expect(page.getByText('2장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작'}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
@@ -238,7 +238,7 @@ test('instructor drawing, eraser undo, per-photo notes, pen input and preview',a
  await page.setViewportSize({width:1280,height:800})
  const photo=await sharp({create:{width:600,height:800,channels:3,background:'#888'}}).png().toBuffer()
  await page.goto('./')
- await page.getByLabel('사진 가져오기').setInputFiles([{name:'ink-a.png',mimeType:'image/png',buffer:photo},{name:'ink-b.png',mimeType:'image/png',buffer:photo}])
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles([{name:'ink-a.png',mimeType:'image/png',buffer:photo},{name:'ink-b.png',mimeType:'image/png',buffer:photo}])
  await expect(page.getByText('2장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작'}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
@@ -280,7 +280,7 @@ test('backup transfers original photos, settings and class preset to fresh conte
  test.setTimeout(90000)
  const photo=await sharp({create:{width:100,height:160,channels:3,background:'#987'}}).png().toBuffer()
  await page.goto('./')
- await page.getByLabel('사진 가져오기').setInputFiles({name:'transfer.png',mimeType:'image/png',buffer:photo})
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles({name:'transfer.png',mimeType:'image/png',buffer:photo})
  await expect(page.getByText('1장 추가')).toBeVisible()
  await page.getByRole('button',{name:'10분',exact:true}).click()
  await page.getByLabel('새 강의실 이름').fill('이전 테스트반')
@@ -326,7 +326,7 @@ test('backup transfers original photos, settings and class preset to fresh conte
 
 test('ART 4C compact tablet player keeps image and touch controls visible',async({page})=>{
  await page.setViewportSize({width:1194,height:834});await page.goto('./')
- await page.getByLabel('사진 가져오기').setInputFiles({name:'tablet.svg',mimeType:'image/svg+xml',buffer:png})
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles({name:'tablet.svg',mimeType:'image/svg+xml',buffer:png})
  await expect(page.getByText('1장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작'}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
@@ -354,7 +354,7 @@ test('ART 4C dashboard quick start and focus view preserve lesson state',async({
  await page.getByRole('link',{name:'미술자료',exact:true}).click()
  await expect(page.locator('#materials')).toBeInViewport()
  await page.getByRole('link',{name:'오늘의 수업',exact:true}).click()
- await page.getByLabel('사진 가져오기').setInputFiles({name:'focus.svg',mimeType:'image/svg+xml',buffer:png})
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles({name:'focus.svg',mimeType:'image/svg+xml',buffer:png})
  await expect(page.getByText('1장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작'}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
@@ -378,7 +378,7 @@ test('ART 4C dashboard quick start and focus view preserve lesson state',async({
 
 test('ART 4C responsive tool docks disclose advanced settings without changing drawing or timer',async({page})=>{
  await page.setViewportSize({width:1194,height:834});await page.goto('./')
- await page.getByLabel('사진 가져오기').setInputFiles({name:'dock.svg',mimeType:'image/svg+xml',buffer:png})
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles({name:'dock.svg',mimeType:'image/svg+xml',buffer:png})
  await expect(page.getByText('1장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작'}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
@@ -418,7 +418,7 @@ test('ART 4C responsive tool docks disclose advanced settings without changing d
 test('ART 4C compact transport keeps extra commands reachable and preserves paused time',async({page})=>{
  await page.setViewportSize({width:1194,height:834});await page.goto('./')
  await expect(page.getByRole('link',{name:/오프라인 준비/})).toBeVisible()
- await page.getByLabel('사진 가져오기').setInputFiles({name:'transport.svg',mimeType:'image/svg+xml',buffer:png})
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles({name:'transport.svg',mimeType:'image/svg+xml',buffer:png})
  await expect(page.getByText('1장 추가')).toBeVisible()
  await page.getByRole('button',{name:'5분',exact:true}).click()
  await page.getByRole('button',{name:'수업 시작'}).click()
@@ -438,7 +438,7 @@ test('ART 4C compact transport keeps extra commands reachable and preserves paus
 test('ART 5A compact iPad viewport keeps quick start and slide count accessible',async({page})=>{
  await page.setViewportSize({width:800,height:560});await page.goto('./')
  await expect(page.getByRole('button',{name:'수업 시작',exact:true})).toBeInViewport()
- await page.getByLabel('사진 가져오기').setInputFiles([{name:'qa-a.svg',mimeType:'image/svg+xml',buffer:png},{name:'qa-b.svg',mimeType:'image/svg+xml',buffer:png}])
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles([{name:'qa-a.svg',mimeType:'image/svg+xml',buffer:png},{name:'qa-b.svg',mimeType:'image/svg+xml',buffer:png}])
  await expect(page.getByText('2장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작',exact:true}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
@@ -463,7 +463,7 @@ test('ART 5A compact iPad viewport keeps quick start and slide count accessible'
 test('ART 5B pen pressure changes rendered thickness and reports sampled range',async({page})=>{
  await page.setViewportSize({width:1194,height:834});await page.goto('./')
  const photo=await sharp({create:{width:600,height:800,channels:3,background:'#888'}}).png().toBuffer()
- await page.getByLabel('사진 가져오기').setInputFiles({name:'pressure.png',mimeType:'image/png',buffer:photo})
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles({name:'pressure.png',mimeType:'image/png',buffer:photo})
  await expect(page.getByText('1장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작'}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
@@ -492,7 +492,7 @@ test('ART 5B pen pressure changes rendered thickness and reports sampled range',
 test('ART 5B two-finger undo and three-finger redo avoid stray ink',async({page})=>{
  await page.setViewportSize({width:1194,height:834});await page.goto('./')
  const photo=await sharp({create:{width:600,height:800,channels:3,background:'#888'}}).png().toBuffer()
- await page.getByLabel('사진 가져오기').setInputFiles({name:'gesture.png',mimeType:'image/png',buffer:photo})
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles({name:'gesture.png',mimeType:'image/png',buffer:photo})
  await expect(page.getByText('1장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작'}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
@@ -522,7 +522,7 @@ test('ART 5B two-finger undo and three-finger redo avoid stray ink',async({page}
 test('ART 5C image-first stage stays fixed while drawing or analysis controls change',async({page})=>{
  await page.setViewportSize({width:1194,height:834});await page.goto('./')
  const photo=await sharp({create:{width:600,height:800,channels:3,background:'#888'}}).png().toBuffer()
- await page.getByLabel('사진 가져오기').setInputFiles({name:'stage.png',mimeType:'image/png',buffer:photo})
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles({name:'stage.png',mimeType:'image/png',buffer:photo})
  await expect(page.getByText('1장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작'}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
@@ -589,7 +589,7 @@ test('ART 5C image-first stage stays fixed while drawing or analysis controls ch
 test('ART 5D reference opacity fades only the photo on white paper and persists through demonstration',async({page})=>{
  await page.setViewportSize({width:1194,height:834});await page.goto('./')
  const photo=await sharp({create:{width:600,height:800,channels:3,background:'#202020'}}).png().toBuffer()
- await page.getByLabel('사진 가져오기').setInputFiles({name:'paper.png',mimeType:'image/png',buffer:photo})
+ await expect(page.getByLabel('사진 가져오기')).toBeEnabled();await page.getByLabel('사진 가져오기').setInputFiles({name:'paper.png',mimeType:'image/png',buffer:photo})
  await expect(page.getByText('1장 추가')).toBeVisible()
  await page.getByRole('button',{name:'수업 시작'}).click()
  await page.getByRole('button',{name:'일시정지'}).click()
