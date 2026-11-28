@@ -345,3 +345,45 @@ input:not([type=checkbox]):not([type=range]),select{font-size:1rem}
 
 /* ART 5B: pressure diagnostics are visible only in advanced drawing tools. */
 .ink-pressure-toggle{display:flex;align-items:center;gap:8px;min-height:44px;font-size:.9375rem;color:#f5f2ed}.ink-pressure-toggle input{width:20px;height:20px;accent-color:var(--orange);flex:none}.ink-pressure-report{font-size:.875rem;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1.5;overflow-wrap:anywhere}
+
+
+/* ART 5C: image-first presentation stage. All controls float independently of the photo. */
+.player.image-first{position:relative;display:block;padding:0;isolation:isolate;--stage-x:max(10px,env(safe-area-inset-left));--stage-right:max(10px,env(safe-area-inset-right));--stage-top:max(8px,env(safe-area-inset-top));--stage-bottom:max(8px,env(safe-area-inset-bottom))}
+.image-first .visual{position:absolute;inset:0;display:block;border-radius:0;overflow:hidden}
+.image-first .photo-area{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.image-first .player-top{position:absolute;z-index:5;top:var(--stage-top);left:var(--stage-x);right:var(--stage-right);width:auto;display:flex;align-items:center;gap:6px;justify-content:flex-end;pointer-events:none}
+.image-first .player-top .brand{display:none}
+.image-first .player-top .counter{flex:0 1 auto;margin-right:auto;max-width:42%;padding:8px 10px;min-height:44px;align-items:center;border-radius:10px;background:#111010d9;pointer-events:auto}
+.image-first .counter-group{overflow:hidden;text-overflow:ellipsis}
+.image-first .player-top button{pointer-events:auto;background:#181716eb;min-height:44px;box-shadow:0 1px 8px #0004}
+.image-first .player-top button[aria-pressed=true]{background:var(--orange);color:#111010}
+.image-first .player-top button:last-child{background:#181716eb}
+.image-first .clock,.image-first.focus-mode .clock{position:absolute;z-index:2;top:calc(var(--stage-top) + 58px);right:var(--stage-right);width:clamp(112px,15vw,180px);padding:9px 12px;gap:5px;display:flex;flex-direction:column;align-items:center;border:1px solid #ffffff20;border-radius:12px;background:#111010d9;pointer-events:none}
+.image-first .clock strong{font-size:clamp(1.9rem,4.1vw,3.6rem);line-height:1.05}
+.image-first .clock span,.image-first .clock small{font-size:.8rem}
+.image-first .clock .progress{max-width:100%;height:3px}
+.image-first .instructor-preview{position:absolute;z-index:3;left:var(--stage-x);top:calc(var(--stage-top) + 58px);background:#111010e8;border-radius:10px;max-width:165px}
+.image-first .stage-bottom{position:absolute;z-index:4;left:var(--stage-x);right:var(--stage-right);bottom:var(--stage-bottom);display:flex;align-items:center;flex-direction:column;gap:6px;pointer-events:none}
+.image-first .stage-bottom>.tool-dock{pointer-events:auto;width:max-content;max-width:100%;max-height:35dvh;background:#181716f2;box-shadow:0 4px 20px #0006}
+.image-first .stage-bottom>.controls{display:flex;flex-direction:column;align-items:center;gap:4px;max-width:100%;pointer-events:none}
+.image-first .filename{pointer-events:auto;max-width:100%;width:max-content;white-space:normal;overflow-wrap:anywhere;background:#111010c9;color:#e5ded8;padding:3px 8px;border-radius:5px;font-size:.75rem}
+.image-first .control-row,.image-first .transport-extra{pointer-events:auto;width:max-content;max-width:100%;padding:4px;background:#111010df;border:1px solid #ffffff20;border-radius:12px}
+.image-first .control-row button,.image-first .transport-extra button{background:#292725;min-height:44px;padding:7px 10px}
+.image-first .control-row .primary{background:var(--orange);color:#111010}
+.image-first .finished{z-index:10}
+.image-first.focus-mode .stage-bottom{display:none}
+.image-first.focus-mode .player-top .counter{margin-right:auto;flex:0 1 auto}
+@media(max-width:760px){
+ .player.image-first{--stage-x:max(6px,env(safe-area-inset-left));--stage-right:max(6px,env(safe-area-inset-right));--stage-bottom:max(6px,env(safe-area-inset-bottom))}
+ .image-first .player-top{gap:4px}
+ .image-first .player-top .counter{max-width:100%;flex:1 1 100%;margin:0;padding:5px 8px;min-height:32px}
+ .image-first .player-top button{font-size:.8rem;padding:6px 8px}
+ .image-first .clock,.image-first.focus-mode .clock{top:calc(var(--stage-top) + 130px);width:112px}
+ .image-first .instructor-preview{top:calc(var(--stage-top) + 130px);width:115px}
+ .image-first .stage-bottom>.tool-dock{max-height:34dvh}
+ .image-first .control-row button,.image-first .transport-extra button{font-size:.82rem;padding:6px 8px}
+}
+@media(max-height:500px) and (orientation:landscape){
+ .image-first .clock,.image-first.focus-mode .clock{top:calc(var(--stage-top) + 48px);padding:5px 8px}
+ .image-first .stage-bottom>.tool-dock{max-height:33dvh}
+}
