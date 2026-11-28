@@ -53,3 +53,5 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 - ART 2B: user 12/12, CI 13/13, high severity audit passed; Pages activation pending.
 - ART 2C: live publisher passed, catalog v4 / 28; Windows build/browser passed. Weekly task scheduled, future runs pending.
 - ART 2D: variable lesson programs, breaks, reusable presets, class profiles, usage history and unused-first selection implemented; CI pending.
+
+- ART 2D: build/browser CI passed; user requested minute entry, class-add fix and clearer editor. ART 2D-1 v0.6.1 implements split guards and UI; regression pending.
