@@ -278,7 +278,7 @@ export default function App() {
     <LessonPanel data={lessons} save={saveLesson} pool={candidates} startBlocked={!loaded?'사진 저장소를 불러오는 중입니다.':recovery?'이전 수업을 복구하거나 기록을 삭제한 뒤 새 수업을 시작할 수 있습니다.':busy||backupBusy?'사진 저장 작업이 끝나면 수업을 시작할 수 있습니다.':''} onStart={beginProgram}/>
     </section>
     <section id="settings" className="compact-page dashboard-section" hidden={dashboard!=='settings'}><section className="panel"><h2>재생 설정</h2>    <div className="options"><label><input type="checkbox" checked={random} onChange={e=>setRandom(e.target.checked)}/> 무작위 순서</label><label><input type="checkbox" checked={sound} onChange={e=>setSound(e.target.checked)}/> 전환 알림음</label><label><input type="checkbox" checked={showTimer} onChange={e=>setShowTimer(e.target.checked)}/> 남은 시간 표시</label><label>발표 배경<select value={background} onChange={e=>setBackground(e.target.value)}><option value="black">검정</option><option value="gray">회색</option><option value="white">흰색</option></select></label></div>
-</section><span className="version">ART 5E · v1.0.0 RC1</span>
+</section><span className="version">ART 5F · v1.0.0 RC1</span>
     <section className="status-strip" aria-label="앱 상태">
       <span data-testid="offline-status">{pwa.ready?'오프라인 사용 준비 완료':pwa.error||'오프라인 준비 전 · 배포 버전에서 사용'}</span><span>{pwa.online?'온라인':'오프라인'}</span><span>{loaded?storageStatus:storageError?'저장소 오류':'사진 불러오는 중…'}</span>
       <button disabled={!loaded||busy} onClick={()=>void requestStorage()}>저장 유지 요청</button>

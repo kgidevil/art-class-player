@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import {finishPendingRestore} from './storage'
 import './style.css'
+import './slim-tools.css'
 const root=ReactDOM.createRoot(document.getElementById('root')!)
 async function boot(){
  try{await finishPendingRestore();root.render(<React.StrictMode><App/></React.StrictMode>)}
