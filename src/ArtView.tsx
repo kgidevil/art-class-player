@@ -4,16 +4,16 @@ import {clamp,fitRect,needsCanvas,panLimit,processPixels} from './art-tools'
 import type {ArtSettings} from './art-tools'
 import InkLayer from './InkLayer'
 import type {InkAction,InkSettings} from './ink'
-type InkProps={ink:InkSettings;actions:InkAction[];commit:(action:InkAction)=>void;undo:()=>void;redo:()=>void;changeZoom:(zoom:number)=>void}
+type InkProps={ink:InkSettings;actions:InkAction[];commit:(action:InkAction)=>void;undo:()=>void;redo:()=>void;changeZoom:(zoom:number)=>void;photoOpacity:number}
 type Point={x:number;y:number}
 const zero={x:0,y:0}
-function ArtView({src,name,settings,onError,ink,actions,commit,undo,redo,changeZoom}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
+function ArtView({src,name,settings,onError,ink,actions,commit,undo,redo,changeZoom,photoOpacity}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
  return <div className={'art-view'+(settings.compare?' art-compare':'')}>
    {settings.compare&&<div className="art-pane art-original-pane"><span className="art-pane-label">원본</span><img src={src} alt={name+' 원본 비교'} draggable={false}/></div>}
-   <div className="art-pane art-work-pane">{settings.compare&&<span className="art-pane-label">분석 이미지</span>}<WorkImage key={src} src={src} name={name} settings={settings} onError={onError} ink={ink} actions={actions} commit={commit} undo={undo} redo={redo} changeZoom={changeZoom}/></div>
+   <div className="art-pane art-work-pane">{settings.compare&&<span className="art-pane-label">분석 이미지</span>}<WorkImage key={src} src={src} name={name} settings={settings} onError={onError} ink={ink} actions={actions} commit={commit} undo={undo} redo={redo} changeZoom={changeZoom} photoOpacity={photoOpacity}/></div>
  </div>
 }
-function WorkImage({src,name,settings,onError,ink,actions,commit,undo,redo,changeZoom}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
+function WorkImage({src,name,settings,onError,ink,actions,commit,undo,redo,changeZoom,photoOpacity}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
  const view=useRef<HTMLDivElement>(null),img=useRef<HTMLImageElement>(null),canvas=useRef<HTMLCanvasElement>(null)
  const [size,setSize]=useState({width:0,height:0})
  const [natural,setNatural]=useState({width:0,height:0})
@@ -72,8 +72,8 @@ function WorkImage({src,name,settings,onError,ink,actions,commit,undo,redo,chang
  return <div ref={view} className={'art-work-viewport'+(zoom>1?' art-zoomed':'')} data-testid="art-viewport" onPointerDown={down} onPointerMove={move} onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}>
   <div className="art-image-frame" data-testid="art-frame" style={{width:fit.width||'100%',height:fit.height||'100%',transform:'translate('+safePan.x+'px,'+safePan.y+'px) scale('+zoom+')'}}>
    <div className="art-image-layer" style={{transform:'scale('+ (flipX?-1:1)+','+(flipY?-1:1)+')'}}>
-    <img ref={img} className="reference" src={src} alt={name} draggable={false} onLoad={e=>{const el=e.currentTarget;setNatural({width:el.naturalWidth,height:el.naturalHeight})}} onError={onError} style={{filter,visibility:ready?'hidden':'visible'}}/>
-    {canvasMode&&<canvas ref={canvas} className="art-canvas" role="img" aria-label={name+' 분석 이미지'} data-testid="art-canvas" style={{visibility:ready?'visible':'hidden'}}/>}
+    <img ref={img} className="reference" src={src} alt={name} draggable={false} onLoad={e=>{const el=e.currentTarget;setNatural({width:el.naturalWidth,height:el.naturalHeight})}} onError={onError} style={{filter,opacity:photoOpacity/100,visibility:ready?'hidden':'visible'}}/>
+    {canvasMode&&<canvas ref={canvas} className="art-canvas" role="img" aria-label={name+' 분석 이미지'} data-testid="art-canvas" style={{opacity:photoOpacity/100,visibility:ready?'visible':'hidden'}}/>}
     {natural.width>0&&<InkLayer width={natural.width} height={natural.height} flipX={flipX} flipY={flipY} settings={ink} actions={actions} commit={commit} undo={undo} redo={redo} pinch={pinch}/>}
    </div>
    {grid>0&&<div className="art-grid" data-testid="art-grid" aria-hidden="true">{Array.from({length:grid-1},(_,i)=><i key={'v'+i} className="art-grid-v" style={{left:((i+1)*100/grid)+'%'}}/>)}{Array.from({length:grid-1},(_,i)=><i key={'h'+i} className="art-grid-h" style={{top:((i+1)*100/grid)+'%'}}/>)}</div>}
