@@ -8,3 +8,6 @@ During drawing demonstration hide the entire top header, clock, instructor previ
 
 ## Validation
 Extend the stage regression to require one accessible button, hide top/clock/preview/bottom, maintain drawing and photo geometry, restore controls and paused time, and verify portrait exit and Escape. Latest combined CI and physical ART 5D retest pending. Keep release-candidate designation until all physical release gates are verified.
+
+## Reference paper opacity
+Add a quick drawing-dock photo-opacity slider (0–100%, step 5) and reset to 100%. Lowering opacity displays the reference/processed photo over white without changing ink opacity, original bytes, zoom, or geometry. 0% gives a white drawing surface; 100% restores the configured background. Setting persists across drawing/demonstration within a lesson and is visually suspended outside drawing mode; new lessons reset to 100%. Original comparison pane remains the original reference. Dark pen colors are recommended on white paper. No gesture-engine change. Automated coverage added; actual iPad check pending.
