@@ -2,10 +2,12 @@ import {useEffect,useRef,useState} from 'react'
 import type {PointerEvent as ReactPointerEvent} from 'react'
 import {MAX_ACTIONS,MAX_POINTS,normalizePoint,renderInk,paintStroke} from './ink'
 import type {InkAction,InkSettings,Stroke} from './ink'
-export default function InkLayer({width,height,flipX,flipY,settings,actions,commit,undo,redo}:{width:number;height:number;flipX:boolean;flipY:boolean;settings:InkSettings;actions:InkAction[];commit:(action:InkAction)=>void;undo:()=>void;redo:()=>void}){
+export default function InkLayer({width,height,flipX,flipY,settings,actions,commit,undo,redo,pinch}:{width:number;height:number;flipX:boolean;flipY:boolean;settings:InkSettings;actions:InkAction[];commit:(action:InkAction)=>void;undo:()=>void;redo:()=>void;pinch:(scale:number,from:{x:number;y:number},to:{x:number;y:number})=>void}){
  const canvas=useRef<HTMLCanvasElement>(null)
  const draft=useRef<{pointer:number;stroke:Stroke}|null>(null)
- const touches=useRef(new Map<number,{x:number;y:number}>())
+ const touches=useRef(new Map<number,{x:number;y:number;startX:number;startY:number}>())
+ const pair=useRef<{distance:number;x:number;y:number}|null>(null)
+ function geometry(){const [a,b]=[...touches.current.values()];return a&&b?{distance:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y)),x:(a.x+b.x)/2,y:(a.y+b.y)/2}:null}
  const tap=useRef({start:0,peak:0,invalid:false,released:false})
  const [drawing,setDrawing]=useState(false)
  const frame=useRef<number|null>(null)
@@ -15,7 +17,7 @@ export default function InkLayer({width,height,flipX,flipY,settings,actions,comm
  function schedule(){if(frame.current!==null)return;frame.current=requestAnimationFrame(()=>{frame.current=null;redraw()})}
  useEffect(()=>{redraw()},[actions,w,h])
  useEffect(()=>()=>{if(frame.current!==null)cancelAnimationFrame(frame.current)},[])
- useEffect(()=>{if(settings.tool==='move'||!settings.visible){draft.current=null;touches.current.clear();tap.current.invalid=true;setDrawing(false);redraw()}},[settings.tool,settings.visible])
+ useEffect(()=>{if(settings.tool==='move'||!settings.visible){draft.current=null;touches.current.clear();pair.current=null;tap.current.invalid=true;setDrawing(false);redraw()}},[settings.tool,settings.visible])
  function point(e:PointerEvent,el:HTMLCanvasElement){return normalizePoint(e.clientX,e.clientY,el.getBoundingClientRect(),flipX,flipY,e.pressure,e.pointerType==='pen')}
  function cancelDraft(){draft.current=null;setDrawing(false);redraw()}
  function down(e:ReactPointerEvent<HTMLCanvasElement>){
@@ -23,14 +25,14 @@ export default function InkLayer({width,height,flipX,flipY,settings,actions,comm
   if(e.pointerType==='touch'){
    e.stopPropagation();e.preventDefault()
    const t=touches.current,g=tap.current
-   if(!t.size){g.start=performance.now();g.peak=0;g.invalid=!!draft.current&&draft.current.stroke.pointerType!=='touch';g.released=false}
+   if(!t.size){g.start=performance.now();g.peak=0;g.invalid=!!draft.current&&draft.current.stroke.pointerType!=='touch';g.released=false;pair.current=null}
    if(g.released||performance.now()-g.start>350)g.invalid=true
-   t.set(e.pointerId,{x:e.clientX,y:e.clientY});g.peak=Math.max(g.peak,t.size)
+   t.set(e.pointerId,{x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY});g.peak=Math.max(g.peak,t.size)
    try{e.currentTarget.setPointerCapture(e.pointerId)}catch{/* synthetic events */}
-   if(g.peak>1){if(draft.current?.stroke.pointerType==='touch')cancelDraft();return}
+   if(g.peak>1){if(draft.current?.stroke.pointerType==='touch')cancelDraft();pair.current=t.size===2&&g.peak===2&&!draft.current?geometry():null;return}
    if(g.invalid||settings.penOnly)return
   }else if(touches.current.size){tap.current.invalid=true;if(draft.current?.stroke.pointerType==='touch')cancelDraft()}
-  if(settings.tool==='move'||!settings.visible||draft.current||actions.length>=MAX_ACTIONS||e.button!==0||!e.isPrimary||(settings.penOnly&&e.pointerType!=='pen'))return
+  if(draft.current||actions.length>=MAX_ACTIONS||e.button!==0||!e.isPrimary||(settings.penOnly&&e.pointerType!=='pen'))return
   e.stopPropagation();e.preventDefault()
   try{e.currentTarget.setPointerCapture(e.pointerId)}catch{/* synthetic events and older browsers */}
   draft.current={pointer:e.pointerId,stroke:{kind:'stroke',tool:settings.tool,color:settings.color,width:settings.width,opacity:settings.opacity,pointerType:e.pointerType,pressureEnabled:settings.pressureEnabled,points:[point(e.nativeEvent,e.currentTarget)]}}
@@ -39,8 +41,17 @@ export default function InkLayer({width,height,flipX,flipY,settings,actions,comm
  function move(e:ReactPointerEvent<HTMLCanvasElement>){
   if(e.pointerType==='touch'){
    const start=touches.current.get(e.pointerId)
-   if(start&&Math.hypot(e.clientX-start.x,e.clientY-start.y)>18)tap.current.invalid=true
-   if(tap.current.peak>1){e.stopPropagation();e.preventDefault();return}
+   const g=tap.current
+   if(start){start.x=e.clientX;start.y=e.clientY;if(Math.hypot(e.clientX-start.startX,e.clientY-start.startY)>18)g.invalid=true}
+   if(g.peak>1){
+    e.stopPropagation();e.preventDefault()
+    const next=geometry(),prev=pair.current
+    if(touches.current.size===2&&g.peak===2&&!draft.current&&next&&prev){
+     const moved=Math.abs(next.distance-prev.distance)>8||Math.hypot(next.x-prev.x,next.y-prev.y)>10
+     if(g.invalid||moved){g.invalid=true;pinch(next.distance/prev.distance,prev,next);pair.current=next}
+    }
+    return
+   }
   }
   const d=draft.current;if(!d||d.pointer!==e.pointerId)return
   e.stopPropagation();e.preventDefault()
@@ -55,8 +66,8 @@ export default function InkLayer({width,height,flipX,flipY,settings,actions,comm
  function finish(e:ReactPointerEvent<HTMLCanvasElement>,save:boolean){
   if(e.pointerType==='touch'&&touches.current.has(e.pointerId)){
    const t=touches.current,g=tap.current,start=t.get(e.pointerId)!
-   if(!save||Math.hypot(e.clientX-start.x,e.clientY-start.y)>18)g.invalid=true
-   t.delete(e.pointerId);g.released=true
+   if(!save||Math.hypot(e.clientX-start.startX,e.clientY-start.startY)>18)g.invalid=true
+   t.delete(e.pointerId);pair.current=null;g.released=true
    if(g.peak>1){
     e.stopPropagation();e.preventDefault()
     if(!t.size&&save&&!g.invalid&&!draft.current&&performance.now()-g.start<=350){
