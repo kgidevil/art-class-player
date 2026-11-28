@@ -554,4 +554,13 @@ test('ART 5C image-first stage stays fixed while drawing or analysis controls ch
  await expect(page.getByRole('button',{name:'다시 실행',exact:true})).toBeDisabled()
  await page.getByRole('button',{name:'화면 맞춤',exact:true}).click()
  await expect.poll(async()=>Math.abs((await frame.boundingBox())!.height-before.height)).toBeLessThanOrEqual(1)
+ await page.getByRole('button',{name:'시연',exact:true}).click()
+ await expect(page.getByRole('button',{name:'다시 실행',exact:true})).toBeHidden()
+ await expect(layer).toHaveClass(/ink-active/)
+ await stable()
+ const r=(await layer.boundingBox())!
+ await page.mouse.move(r.x+r.width*.5,r.y+r.height*.5);await page.mouse.down();await page.mouse.move(r.x+r.width*.6,r.y+r.height*.5);await page.mouse.up()
+ await page.getByRole('button',{name:'도구 다시 표시',exact:true}).click()
+ await expect(page.getByRole('button',{name:'실행 취소',exact:true})).toBeEnabled()
+ await stable()
 })
