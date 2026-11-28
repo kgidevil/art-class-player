@@ -4,3 +4,6 @@
 - CSS handles original/gray adjustments; canvas analysis processes at most 1600 px on long side to limit resource use. Canvas processing can briefly show original while recalculating or on failure; no external requests or writes to source blobs. Filters affect only display. Grid aligns to fitted image and follows zoom/pan. No pinch gesture or region selection in this stage.
 - Settings persist across slides in an active lesson; zoom/pan reset on next photo; new/recovered lesson starts with defaults. Toolbar closes when entering presentation; current effects remain. Timer continues unless instructor pauses. Break screens do not render image tools.
 - Unit tests: geometry, discrete tones, immutable source and alpha, edge response. Browser regression checks grayscale, canvas pixel, grid geometry, flips, comparison, zoom reset and byte-identical persisted original. Windows CI and physical iPad performance pending at initial commit. Pages activation remains owner setting.
+
+## Final validation
+User-reported 13/13 PASS, including all art tools, original preservation and ART 2D-1 classroom/minute fixes. Run 46094993779 build and Windows browser jobs passed; Pages configure failed. Physical iPad validation deferred.

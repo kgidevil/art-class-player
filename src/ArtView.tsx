@@ -2,15 +2,18 @@ import {useEffect,useLayoutEffect,useRef,useState} from 'react'
 import type {PointerEvent as ReactPointerEvent} from 'react'
 import {clamp,fitRect,needsCanvas,panLimit,processPixels} from './art-tools'
 import type {ArtSettings} from './art-tools'
+import InkLayer from './InkLayer'
+import type {InkAction,InkSettings} from './ink'
+type InkProps={ink:InkSettings;actions:InkAction[];commit:(action:InkAction)=>void}
 type Point={x:number;y:number}
 const zero={x:0,y:0}
-export default function ArtView({src,name,settings,onError}:{src:string;name:string;settings:ArtSettings;onError:()=>void}){
+export default function ArtView({src,name,settings,onError,ink,actions,commit}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
  return <div className={'art-view'+(settings.compare?' art-compare':'')}>
    {settings.compare&&<div className="art-pane art-original-pane"><span className="art-pane-label">원본</span><img src={src} alt={name+' 원본 비교'} draggable={false}/></div>}
-   <div className="art-pane art-work-pane">{settings.compare&&<span className="art-pane-label">분석 이미지</span>}<WorkImage key={src} src={src} name={name} settings={settings} onError={onError}/></div>
+   <div className="art-pane art-work-pane">{settings.compare&&<span className="art-pane-label">분석 이미지</span>}<WorkImage key={src} src={src} name={name} settings={settings} onError={onError} ink={ink} actions={actions} commit={commit}/></div>
  </div>
 }
-function WorkImage({src,name,settings,onError}:{src:string;name:string;settings:ArtSettings;onError:()=>void}){
+function WorkImage({src,name,settings,onError,ink,actions,commit}:{src:string;name:string;settings:ArtSettings;onError:()=>void}&InkProps){
  const view=useRef<HTMLDivElement>(null),img=useRef<HTMLImageElement>(null),canvas=useRef<HTMLCanvasElement>(null)
  const [size,setSize]=useState({width:0,height:0})
  const [natural,setNatural]=useState({width:0,height:0})
@@ -50,7 +53,7 @@ function WorkImage({src,name,settings,onError}:{src:string;name:string;settings:
   return()=>{cancelled=true;cancelAnimationFrame(frame)}
  },[key,canvasMode])
  function down(e:ReactPointerEvent<HTMLDivElement>){
-  if(zoom<=1||e.button!==0)return
+  if(zoom<=1||e.button!==0||(ink.visible&&ink.tool!=='move'))return
   e.currentTarget.setPointerCapture(e.pointerId);drag.current={pointer:e.pointerId,x:e.clientX,y:e.clientY,start:safePan}
  }
  function move(e:ReactPointerEvent<HTMLDivElement>){const d=drag.current;if(d?.pointer!==e.pointerId)return;setPan({x:clamp(d.start.x+e.clientX-d.x,-maxX,maxX),y:clamp(d.start.y+e.clientY-d.y,-maxY,maxY)})}
@@ -61,6 +64,7 @@ function WorkImage({src,name,settings,onError}:{src:string;name:string;settings:
    <div className="art-image-layer" style={{transform:'scale('+ (flipX?-1:1)+','+(flipY?-1:1)+')'}}>
     <img ref={img} className="reference" src={src} alt={name} draggable={false} onLoad={e=>{const el=e.currentTarget;setNatural({width:el.naturalWidth,height:el.naturalHeight})}} onError={onError} style={{filter,visibility:ready?'hidden':'visible'}}/>
     {canvasMode&&<canvas ref={canvas} className="art-canvas" role="img" aria-label={name+' 분석 이미지'} data-testid="art-canvas" style={{visibility:ready?'visible':'hidden'}}/>}
+    {natural.width>0&&<InkLayer width={natural.width} height={natural.height} flipX={flipX} flipY={flipY} settings={ink} actions={actions} commit={commit}/>}
    </div>
    {grid>0&&<div className="art-grid" data-testid="art-grid" aria-hidden="true">{Array.from({length:grid-1},(_,i)=><i key={'v'+i} className="art-grid-v" style={{left:((i+1)*100/grid)+'%'}}/>)}{Array.from({length:grid-1},(_,i)=><i key={'h'+i} className="art-grid-h" style={{top:((i+1)*100/grid)+'%'}}/>)}</div>}
   </div>

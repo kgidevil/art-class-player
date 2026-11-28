@@ -58,3 +58,6 @@ An iPad-first visual reference player for senior adult drawing classes in Cheong
 
 - ART 2D-1: build and Windows browser CI passed; manual retest not reported.
 - ART 3A: display-only art analysis, grids, flips, zoom/pan, compare implemented; CI pending.
+
+- ART 3A: user 13/13, build/Windows browser passed; Pages activation pending.
+- ART 3B: instructor preview, step progress, display-only drawing and presentation adjustments implemented; CI pending.
